@@ -1,0 +1,221 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserStatus {
+  ACTIVE
+  FROZEN
+}
+
+enum Side {
+  BUY
+  SELL
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SUBMITTED
+  CONFIRMED
+  SKIPPED
+  FAILED
+}
+
+enum WithdrawalStatus {
+  PENDING
+  PROCESSING
+  SUBMITTED
+  CONFIRMED
+  FAILED
+}
+
+enum WithdrawAsset {
+  SOL
+  USDT
+  BNB
+}
+
+model User {
+  id          String        @id @default(cuid())
+  telegramId  BigInt        @unique
+  username    String?
+  status      UserStatus    @default(ACTIVE)
+  pinHash     String?
+  pending     Json? // multi-step flow state: { action, step, data }
+  // Internal (pooled) ledger balances, in each asset's raw units.
+  balanceSol  BigInt        @default(0) // lamports
+  balanceUsdt BigInt        @default(0) // BEP-20 USDT raw units
+  balanceBnb  BigInt        @default(0) // wei
+  createdAt   DateTime      @default(now())
+  wallet      Wallet?
+  follows     Follow[]
+  withdrawals Withdrawal[]
+  ledger      LedgerEntry[]
+}
+
+model Wallet {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id])
+  address           String   @unique // Solana address (base58)
+  encrypted         Json // envelope-encrypted Solana secret key (see crypto.ts)
+  evmAddress        String?  @unique // EVM address (0x...), used for USDT deposits
+  evmEncrypted      Json? // envelope-encrypted EVM private key
+  lastKnownLamports BigInt   @default(0) // for deposit notifications
+  lastKnownUsdt     BigInt   @default(0) // raw USDT units, for deposit notifications
+  lastKnownEvmNative BigInt  @default(0) // raw native (BNB) units, for gas-topup notifications
+  createdAt         DateTime @default(now())
+}
+
+model Trader {
+  id        String       @id @default(cuid())
+  address   String       @unique
+  label     String
+  active    Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  follows   Follow[]
+  swaps     LeaderSwap[]
+}
+
+model Follow {
+  id           String          @id @default(cuid())
+  userId       String
+  traderId     String
+  user         User            @relation(fields: [userId], references: [id])
+  trader       Trader          @relation(fields: [traderId], references: [id])
+  active       Boolean         @default(false)
+  paper        Boolean         @default(true) // paper mode by default
+  buyLamports  BigInt          @default(50000000) // 0.05 SOL per copied buy
+  maxLamports  BigInt          @default(100000000) // hard cap per trade
+  slippageBps  Int             @default(1000)
+  copyBuys     Boolean         @default(true)
+  copySells    Boolean         @default(true)
+  strictSafety Boolean         @default(true) // require renounced mint/freeze authority
+  createdAt    DateTime        @default(now())
+  orders       CopyOrder[]
+  paperPositions PaperPosition[]
+  livePositions LivePosition[]
+
+  @@unique([userId, traderId])
+}
+
+model LeaderSwap {
+  id         String       @id @default(cuid())
+  signature  String       @unique // idempotency: webhooks can be delivered more than once
+  traderId   String
+  trader     Trader       @relation(fields: [traderId], references: [id])
+  side       Side
+  tokenMint  String
+  inputMint  String
+  outputMint String
+  inAmount   String // raw units as string (BigInt-safe)
+  outAmount  String
+  blockTime  DateTime
+  createdAt  DateTime     @default(now())
+  orders     CopyOrder[]
+}
+
+model CopyOrder {
+  id              String      @id @default(cuid())
+  followId        String
+  follow          Follow      @relation(fields: [followId], references: [id])
+  swapId          String
+  swap            LeaderSwap  @relation(fields: [swapId], references: [id])
+  leaderSignature String
+  side            Side
+  tokenMint       String
+  paper           Boolean
+  status          OrderStatus @default(PENDING)
+  inAmountRaw     String?
+  outAmountRaw    String?
+  requestId       String? // Jupiter requestId
+  txSignature     String?
+  skipReason      String?
+  error           String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@unique([followId, leaderSignature]) // one order per follower per leader trade
+  @@index([status, createdAt])
+}
+
+model PaperPosition {
+  id           String @id @default(cuid())
+  followId     String
+  follow       Follow @relation(fields: [followId], references: [id])
+  tokenMint    String
+  amountRaw    String
+  costLamports BigInt
+
+  @@unique([followId, tokenMint])
+}
+
+/// A real (live) token position held by the pool on a user's behalf. The tokens
+/// themselves sit commingled in the pool wallet; this is the per-user accounting.
+model LivePosition {
+  id           String @id @default(cuid())
+  followId     String
+  follow       Follow @relation(fields: [followId], references: [id])
+  tokenMint    String
+  amountRaw    String
+  costLamports BigInt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([followId, tokenMint])
+  @@index([followId])
+}
+
+model Withdrawal {
+  id          String           @id @default(cuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id])
+  asset       WithdrawAsset    @default(SOL) // SOL (Solana) | USDT (BEP-20) | BNB (BEP-20 native gas)
+  toAddress   String
+  amountRaw   BigInt // lamports for SOL, token raw units for USDT, wei for BNB
+  status      WithdrawalStatus @default(PENDING) // PENDING until an admin marks it paid or rejects it
+  txSignature String? // payout tx hash entered by the admin from the operator wallet
+  error       String?
+  approvedBy  String? // admin username who actioned the request
+  approvedAt  DateTime?
+  note        String?
+  createdAt   DateTime         @default(now())
+
+  @@index([status, createdAt])
+  @@index([userId, asset, createdAt])
+}
+
+/// Append-only record of every balance change. Balances on User are the running
+/// total; this table is the audit trail.
+model LedgerEntry {
+  id           String        @id @default(cuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id])
+  asset        WithdrawAsset
+  deltaRaw     BigInt // positive = credit, negative = debit
+  balanceAfter BigInt
+  reason       String // deposit | withdraw_request | withdraw_refund | withdraw_paid | admin_adjust | sweep
+  refId        String?
+  createdAt    DateTime      @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model Setting {
+  key   String @id
+  value String
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  meta      Json?
+  createdAt DateTime @default(now())
+}

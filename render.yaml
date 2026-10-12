@@ -1,0 +1,80 @@
+# Render blueprint for the BACKEND (apps/server). In Render: New → Blueprint → pick this repo.
+#
+# The server is a long-running process (bot + webhooks + trading loops), but Render's
+# free tier has no background workers — so it runs as a (free) Web Service that binds
+# $PORT and serves /health. Keep it awake with an uptime monitor hitting /health every
+# ~10 min (the server also self-pings via RENDER_EXTERNAL_URL as a backup), otherwise
+# Render spins it down after 15 min idle and copy-trading stalls.
+#
+# The frontend (apps/web) deploys separately on Vercel; it calls this service's URL.
+services:
+  - type: web
+    name: copytrade-server
+    runtime: node
+    plan: free
+    region: oregon
+    rootDir: .
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @copytrade/core db:generate
+    startCommand: pnpm --filter server start:prod
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "22.14.0"
+      # Required — fill these in Render Dashboard → Environment.
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_WEBHOOK_SECRET
+        sync: false
+      - key: WALLET_KEK_BASE64
+        sync: false
+      # Public URL of THIS service (Telegram + Helius webhooks point here), and the
+      # Vercel web origin allowed to call it from the browser (mini app).
+      - key: PUBLIC_BASE_URL
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      # Admin API basic auth (must match the web app's ADMIN_USER / ADMIN_PASSWORD).
+      - key: ADMIN_USER
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      # Recommended — admin deposit/error alerts, chain + swap providers.
+      - key: TELEGRAM_ADMIN_CHAT_ID
+        sync: false
+      - key: HELIUS_RPC_URL
+        sync: false
+      - key: HELIUS_API_KEY
+        sync: false
+      - key: HELIUS_WEBHOOK_ID
+        sync: false
+      - key: HELIUS_WEBHOOK_SECRET
+        sync: false
+      - key: JUPITER_API_KEY
+        sync: false
+      - key: EVM_RPC_URL
+        sync: false
+      # Pooled custody / safety defaults.
+      - key: OPERATOR_SOL_ADDRESS
+        sync: false
+      - key: OPERATOR_EVM_ADDRESS
+        sync: false
+      - key: OPERATOR2_SOL_ADDRESS
+        sync: false
+      - key: OPERATOR2_EVM_ADDRESS
+        sync: false
+      - key: OPERATOR2_SHARE
+        value: "0"
+      - key: SWEEP_DEPOSITS
+        value: "true"
+      - key: TRADING_ENABLED
+        value: "true"
+      - key: SIMULATE_TRADING
+        value: "true"
+      - key: LIVE_TRADING_ALLOWED
+        value: "false"
+      - key: WORKER_KEEPALIVE_MS
+        value: "600000"

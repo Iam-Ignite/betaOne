@@ -1,0 +1,30 @@
+{
+  "name": "server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "dotenv -e ../../.env -- tsx watch src/index.ts",
+    "start": "dotenv -e ../../.env -- tsx src/index.ts",
+    "start:prod": "tsx src/index.ts",
+    "set-webhook": "dotenv -e ../../.env -- tsx scripts/set-webhook.ts",
+    "create-helius-webhook": "dotenv -e ../../.env -- tsx scripts/create-helius-webhook.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@copytrade/core": "workspace:^",
+    "@solana/web3.js": "^1.99.0",
+    "argon2": "^0.45.1",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "grammy": "^1.46.0",
+    "tsx": "^4.23.15"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "24",
+    "dotenv-cli": "^11.0.0",
+    "typescript": "5.9.3"
+  }
+}

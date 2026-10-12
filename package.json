@@ -1,26 +1,21 @@
 {
-  "name": "prime",
+  "name": "copytrade-bot",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+    "dev": "pnpm --filter web dev",
+    "dev:web": "pnpm --filter web dev",
+    "dev:server": "pnpm --filter server dev",
+    "build": "pnpm --filter web build",
+    "start": "pnpm --filter server start:prod",
+    "lint": "pnpm --filter web lint",
+    "typecheck": "pnpm -r typecheck",
+    "db:generate": "pnpm --filter @copytrade/core db:generate",
+    "db:push": "pnpm --filter @copytrade/core db:push",
+    "db:migrate": "pnpm --filter @copytrade/core db:migrate",
+    "db:deploy": "pnpm --filter @copytrade/core db:deploy",
+    "set-webhook": "pnpm --filter server set-webhook",
+    "create-helius-webhook": "pnpm --filter server create-helius-webhook"
   },
-  "dependencies": {
-    "next": "16.4.0",
-    "react": "19.3.0",
-    "react-dom": "19.3.0"
-  },
-  "devDependencies": {
-    "@tailwindcss/turbopack": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.4.0",
-    "tailwindcss": "^4",
-    "typescript": "^5"
-  }
+  "packageManager": "pnpm@9.11.0"
 }
