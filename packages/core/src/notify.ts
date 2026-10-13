@@ -12,14 +12,16 @@ function api(): Api {
 }
 
 /** Send an HTML message to a user. Never throws: users may have blocked the bot. */
-export async function notify(telegramId: bigint | number, html: string) {
+export async function notify(telegramId: bigint | number, html: string): Promise<boolean> {
   try {
     await api().sendMessage(Number(telegramId), html, {
       parse_mode: "HTML",
       link_preview_options: { is_disabled: true },
     });
+    return true;
   } catch (e) {
     console.error("notify failed", e);
+    return false;
   }
 }
 

@@ -229,6 +229,15 @@ function IconChevronDown({ className }: { className?: string }) {
   );
 }
 
+function IconSend({ className }: { className?: string }) {
+  return (
+    <svg className={iconCls(className, "w-4 h-4")} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" />
+      <path d="m21.854 2.147-10.94 10.939" />
+    </svg>
+  );
+}
+
 /* ---------------------------------------------------------------- UI Primitives */
 
 export function CopyButton({
@@ -725,6 +734,9 @@ function UserDetail({ user }: { user: AdminUser }) {
 
       {/* Adjust Balance Form */}
       <AdjustBalanceForm user={user} />
+
+      {/* Free-form message to this user */}
+      <SendMessageForm telegramId={user.telegramId} />
     </div>
   );
 }
@@ -736,12 +748,14 @@ function AdjustBalanceForm({ user }: { user: AdminUser }) {
   const [action, setAction] = useState<"set" | "credit" | "debit">("set");
   const [value, setValue] = useState("");
   const [reason, setReason] = useState("");
-  const [busy, start] = useTransition();
+  const [busy, setBusy] = useState(false);
+  const [, start] = useTransition();
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!value.trim()) return;
+    if (!value.trim() || busy) return;
+    setBusy(true);
     setMsg(null);
     const body =
       mode === "percent"
@@ -765,6 +779,8 @@ function AdjustBalanceForm({ user }: { user: AdminUser }) {
       start(() => router.refresh());
     } catch (err) {
       setMsg({ ok: false, text: (err as Error).message });
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -883,6 +899,168 @@ function AdjustBalanceForm({ user }: { user: AdminUser }) {
   );
 }
 
+/* -------------------------------------------------------- Send Message Form */
+
+const MESSAGE_TEMPLATES = [
+  {
+    label: "Payment Confirmation",
+    title: "System Update - Payment Confirmation",
+    message:
+      "Your withdrawal has been confirmed and the funds have been sent to your wallet. Please allow a few minutes for the network to confirm the transaction.",
+  },
+  {
+    label: "Processing",
+    title: "System Update - Withdrawal Processing",
+    message:
+      "Your withdrawal is currently being processed. This can take a little while; we'll follow up once it completes.",
+  },
+  {
+    label: "On Hold",
+    title: "System Update - Withdrawal On Hold",
+    message:
+      "Your withdrawal has been placed on hold pending a quick review. We'll update you as soon as it is released.",
+  },
+] as const;
+
+export function SendMessageForm({
+  telegramId,
+  withdrawalId,
+  context,
+  defaultTitle = "System Update - Payment Confirmation",
+  compact = false,
+  onClose,
+}: {
+  telegramId?: string;
+  withdrawalId?: string;
+  context?: string;
+  defaultTitle?: string;
+  compact?: boolean;
+  onClose?: () => void;
+}) {
+  const [title, setTitle] = useState(defaultTitle);
+  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!message.trim() || busy) return;
+    setBusy(true);
+    setMsg(null);
+    try {
+      const res = await fetch("/api/admin/message", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ telegramId, withdrawalId, title: title.trim(), message: message.trim() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? "Failed to send message");
+      setMsg(
+        data.delivered
+          ? { ok: true, text: "Message delivered to the user on Telegram." }
+          : { ok: false, text: "Message saved, but delivery failed — the user may have blocked the bot." },
+      );
+      if (data.delivered) setMessage("");
+    } catch (err) {
+      setMsg({ ok: false, text: (err as Error).message });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form onSubmit={submit} className="space-y-3 rounded-xl border border-zinc-200 bg-white p-3.5 md:p-4 shadow-xs">
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="flex items-center gap-1.5 text-xs font-semibold text-zinc-800">
+          <IconSend className="h-3.5 w-3.5 text-zinc-500" />
+          Send Message to User
+        </h3>
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md px-1.5 py-0.5 text-[11px] font-medium text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700"
+          >
+            Close
+          </button>
+        )}
+      </div>
+
+      {context && (
+        <p className="rounded-lg bg-zinc-50 px-2.5 py-1.5 font-mono text-[11px] text-zinc-500">
+          Re: {context}
+        </p>
+      )}
+
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span className="text-[11px] text-zinc-400 mr-1">Template:</span>
+        {MESSAGE_TEMPLATES.map((t) => (
+          <button
+            key={t.label}
+            type="button"
+            onClick={() => {
+              setTitle(t.title);
+              setMessage(t.message);
+              setMsg(null);
+            }}
+            className="rounded-lg bg-zinc-100 px-2.5 py-1 text-[11px] font-medium text-zinc-600 ring-1 ring-inset ring-zinc-200 transition hover:bg-zinc-200 active:scale-95"
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      <input
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Message title (optional)"
+        className="w-full rounded-xl border border-zinc-200 bg-zinc-50/70 px-3 py-2 text-base md:text-sm outline-none transition focus:border-zinc-400 focus:bg-white focus:ring-2 focus:ring-zinc-900/5"
+      />
+
+      <textarea
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        rows={compact ? 3 : 4}
+        placeholder="Type the message to send to the user…"
+        className="w-full resize-y rounded-xl border border-zinc-200 bg-zinc-50/70 px-3 py-2 text-base md:text-sm outline-none transition focus:border-zinc-400 focus:bg-white focus:ring-2 focus:ring-zinc-900/5"
+      />
+
+      <div className="flex items-center justify-end">
+        <button
+          type="submit"
+          disabled={busy || !message.trim()}
+          className="flex items-center justify-center gap-1.5 rounded-xl bg-zinc-900 px-5 py-2 text-sm font-semibold text-white transition hover:bg-zinc-800 active:scale-98 disabled:opacity-40"
+        >
+          {busy ? (
+            <>
+              <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              <span>Sending…</span>
+            </>
+          ) : (
+            <>
+              <IconSend className="h-3.5 w-3.5" />
+              <span>Send Message</span>
+            </>
+          )}
+        </button>
+      </div>
+
+      {msg && (
+        <div
+          className={`rounded-lg p-2.5 text-xs font-medium ${
+            msg.ok
+              ? "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200"
+              : "bg-amber-50 text-amber-800 ring-1 ring-amber-200"
+          }`}
+        >
+          {msg.ok ? "✓ " : "✕ "}
+          {msg.text}
+        </div>
+      )}
+    </form>
+  );
+}
+
 /* -------------------------------------------------------- Withdrawals Section */
 
 export function WithdrawalsTable({ rows }: { rows: PendingWithdrawal[] }) {
@@ -891,6 +1069,7 @@ export function WithdrawalsTable({ rows }: { rows: PendingWithdrawal[] }) {
   const [tx, setTx] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [confirmReject, setConfirmReject] = useState<string | null>(null);
+  const [messageFor, setMessageFor] = useState<string | null>(null);
   const [, start] = useTransition();
 
   async function act(id: string, action: "paid" | "reject") {
@@ -1070,6 +1249,25 @@ export function WithdrawalsTable({ rows }: { rows: PendingWithdrawal[] }) {
                     Reject…
                   </button>
                 </div>
+              )}
+
+              {/* Optional follow-up message to the user about this withdrawal */}
+              {messageFor === r.id ? (
+                <SendMessageForm
+                  withdrawalId={r.id}
+                  context={`${r.amountLabel} → ${r.toAddress}`}
+                  compact
+                  onClose={() => setMessageFor(null)}
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setMessageFor(r.id)}
+                  className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-zinc-200 bg-white py-2 text-xs font-semibold text-zinc-600 transition hover:bg-zinc-50 active:scale-98"
+                >
+                  <IconSend className="h-3.5 w-3.5" />
+                  <span>Message user</span>
+                </button>
               )}
             </div>
           </div>

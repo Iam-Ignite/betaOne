@@ -38,6 +38,10 @@ adminRouter.use("/admin", (req: Request, res: Response, next: NextFunction) => {
 const fmtAmount = (asset: string, raw: bigint) =>
   asset === "USDT" ? `${fmtUsdt(raw)} USDT` : asset === "BNB" ? `${fmtEvmNative(raw)} BNB` : `${fmtSol(raw)} SOL`;
 
+/** Escape admin-supplied text so it can be sent safely with Telegram HTML parse mode. */
+const escapeHtml = (s: string) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
 /** Everything the admin dashboard renders, pre-formatted so the UI needs no core. */
 adminRouter.get("/admin/dashboard", async (_req, res) => {
   const since = new Date(Date.now() - 864e5);
@@ -365,3 +369,60 @@ adminRouter.post("/admin/withdrawals", async (req, res) => {
   );
   res.json({ ok: true, status: "FAILED" });
 });
+
+type MessageBody = {
+  telegramId?: string;
+  withdrawalId?: string;
+  title?: string;
+  message?: string;
+};
+
+/**
+ * Free-form follow-up message from an admin to a single user's Telegram.
+ * Target either a user directly (`telegramId`) or via one of their
+ * withdrawals (`withdrawalId`). Admin text is HTML-escaped before sending.
+ */
+adminRouter.post("/admin/message", async (req, res) => {
+  const body = (req.body ?? {}) as MessageBody;
+  const message = body.message?.trim();
+  if (!message) return res.status(400).json({ error: "message required" });
+  if (!body.telegramId && !body.withdrawalId) {
+    return res.status(400).json({ error: "telegramId or withdrawalId required" });
+  }
+
+  let user: { id: string; telegramId: bigint } | null = null;
+  let withdrawalContext: string | null = null;
+
+  if (body.withdrawalId) {
+    const w = await db.withdrawal.findUnique({
+      where: { id: body.withdrawalId },
+      include: { user: { select: { id: true, telegramId: true } } },
+    });
+    if (!w) return res.status(404).json({ error: "withdrawal not found" });
+    user = w.user;
+    withdrawalContext = `${fmtAmount(w.asset, w.amountRaw)} → ${w.toAddress}`;
+  } else {
+    user = await db.user.findUnique({
+      where: { telegramId: BigInt(body.telegramId as string) },
+      select: { id: true, telegramId: true },
+    });
+    if (!user) return res.status(404).json({ error: "user not found" });
+  }
+
+  const title = body.title?.trim();
+  const html = `${title ? `<b>${escapeHtml(title)}</b>\n\n` : ""}${escapeHtml(message)}${
+    withdrawalContext ? `\n\n<i>${escapeHtml(withdrawalContext)}</i>` : ""
+  }`;
+
+  const delivered = await notify(user.telegramId, html);
+  await db.auditLog.create({
+    data: {
+      userId: user.id,
+      action: "admin_message",
+      meta: { withdrawalId: body.withdrawalId ?? null, title: title ?? null },
+    },
+  });
+
+  res.json({ ok: true, delivered });
+});
+
