@@ -1,0 +1,14 @@
+[
+  {
+    "content": "Fix 404 error by updating API endpoint path in useSystemMonitoringData.ts",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Fix FloatingChatHistory styling - light gray background and white main background",
+    "status": "completed",
+    "priority": "medium",
+    "id": "2"
+  }
+]

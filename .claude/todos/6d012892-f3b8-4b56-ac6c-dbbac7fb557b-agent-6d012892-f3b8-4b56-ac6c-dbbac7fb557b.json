@@ -1,0 +1,14 @@
+[
+  {
+    "content": "Search for all occurrences of 'Reverse Brand' in the project",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Replace 'Reverse Brand' with 'Chic Finesse' in all found files",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  }
+]

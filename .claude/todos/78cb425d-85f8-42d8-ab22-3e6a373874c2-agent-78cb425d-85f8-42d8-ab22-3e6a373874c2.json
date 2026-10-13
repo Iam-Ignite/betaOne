@@ -1,0 +1,56 @@
+[
+  {
+    "content": "Analyze project structure and understand existing patterns",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Create database migrations for Family Values Assessment",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Create models for Family Values Assessment",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Implement API controllers and routes",
+    "status": "completed",
+    "priority": "high",
+    "id": "4"
+  },
+  {
+    "content": "Create TypeScript interfaces for frontend",
+    "status": "completed",
+    "priority": "high",
+    "id": "5"
+  },
+  {
+    "content": "Build React components for Assessment UI",
+    "status": "completed",
+    "priority": "high",
+    "id": "6"
+  },
+  {
+    "content": "Implement data fetching with custom hooks",
+    "status": "in_progress",
+    "priority": "high",
+    "id": "7"
+  },
+  {
+    "content": "Add tests for backend functionality",
+    "status": "pending",
+    "priority": "medium",
+    "id": "8"
+  },
+  {
+    "content": "Add tests for frontend components",
+    "status": "pending",
+    "priority": "medium",
+    "id": "9"
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "content": "Examine the booking page table implementation",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Apply the same loader pattern to booking page table",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  }
+]

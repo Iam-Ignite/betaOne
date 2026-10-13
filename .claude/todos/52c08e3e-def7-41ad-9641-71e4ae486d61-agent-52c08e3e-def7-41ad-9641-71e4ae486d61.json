@@ -1,0 +1,20 @@
+[
+  {
+    "content": "Examine menu page data fetch structure",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Examine current orders page structure",
+    "status": "in_progress",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Apply menu page data fetch pattern to orders page",
+    "status": "pending",
+    "priority": "high",
+    "id": "3"
+  }
+]

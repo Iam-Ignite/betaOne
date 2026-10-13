@@ -1,0 +1,68 @@
+[
+  {
+    "content": "Analyze project structure and existing patterns",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Create backend models and migrations for Harmonic Saturation Profile",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Implement API controllers and routes",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Create TypeScript interfaces for frontend",
+    "status": "completed",
+    "priority": "high",
+    "id": "4"
+  },
+  {
+    "content": "Build React components for Harmonic Saturation Profile Designer",
+    "status": "completed",
+    "priority": "high",
+    "id": "5"
+  },
+  {
+    "content": "Implement data fetching hooks",
+    "status": "completed",
+    "priority": "medium",
+    "id": "6"
+  },
+  {
+    "content": "Create main page for Harmonic Saturation Designer",
+    "status": "completed",
+    "priority": "high",
+    "id": "7"
+  },
+  {
+    "content": "Add routes and navigation for Harmonic Saturation Designer",
+    "status": "completed",
+    "priority": "high",
+    "id": "8"
+  },
+  {
+    "content": "Add missing API endpoints to routes/api.php",
+    "status": "completed",
+    "priority": "medium",
+    "id": "9"
+  },
+  {
+    "content": "Write backend tests with Pest",
+    "status": "completed",
+    "priority": "medium",
+    "id": "10"
+  },
+  {
+    "content": "Write frontend tests with Vitest",
+    "status": "completed",
+    "priority": "medium",
+    "id": "11"
+  }
+]

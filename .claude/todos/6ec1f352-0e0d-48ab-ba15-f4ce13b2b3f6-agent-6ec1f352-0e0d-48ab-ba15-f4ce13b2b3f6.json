@@ -1,0 +1,32 @@
+[
+  {
+    "content": "Fix date grouping sort order - dates should be ascending (oldest first)",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Update date labels to show date and time for older messages",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Ensure new messages appear at bottom of chat (newest at bottom)",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Test that messages within each date group stay chronological",
+    "status": "completed",
+    "priority": "medium",
+    "id": "4"
+  },
+  {
+    "content": "Verify auto-scroll still works with fixed message ordering",
+    "status": "completed",
+    "priority": "medium",
+    "id": "5"
+  }
+]

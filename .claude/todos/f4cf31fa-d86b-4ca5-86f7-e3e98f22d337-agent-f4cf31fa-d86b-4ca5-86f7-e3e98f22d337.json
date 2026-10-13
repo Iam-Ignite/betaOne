@@ -1,0 +1,20 @@
+[
+  {
+    "content": "Add CWMAI System section to Sidebaritems.ts with main dashboard, project management, research engine, work queue, and monitoring pages",
+    "status": "completed",
+    "priority": "high",
+    "id": "cwmai_sidebar_1"
+  },
+  {
+    "content": "Add CWMAI Documentation section with system flow, research process, architecture, and setup guide pages",
+    "status": "completed",
+    "priority": "high",
+    "id": "cwmai_sidebar_2"
+  },
+  {
+    "content": "Add CWMAI Files section with quick access to key configuration files and project directories",
+    "status": "completed",
+    "priority": "medium",
+    "id": "cwmai_sidebar_3"
+  }
+]

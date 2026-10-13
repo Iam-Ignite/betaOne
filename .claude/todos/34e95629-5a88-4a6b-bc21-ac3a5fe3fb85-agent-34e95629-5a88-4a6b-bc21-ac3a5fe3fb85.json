@@ -1,0 +1,44 @@
+[
+  {
+    "content": "Add new state 'isMobileMainSidebarOpen' to sidebarStore",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Create standalone mobile IconSidebar component",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Modify MobileSidebar to show only main content (remove IconSidebar)",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Update IconSidebar to handle mobile-specific behavior",
+    "status": "completed",
+    "priority": "high",
+    "id": "4"
+  },
+  {
+    "content": "Update FullLayout to include standalone mobile IconSidebar",
+    "status": "completed",
+    "priority": "high",
+    "id": "5"
+  },
+  {
+    "content": "Add mobile-specific CSS styles",
+    "status": "completed",
+    "priority": "medium",
+    "id": "6"
+  },
+  {
+    "content": "Test the progressive disclosure behavior",
+    "status": "completed",
+    "priority": "medium",
+    "id": "7"
+  }
+]

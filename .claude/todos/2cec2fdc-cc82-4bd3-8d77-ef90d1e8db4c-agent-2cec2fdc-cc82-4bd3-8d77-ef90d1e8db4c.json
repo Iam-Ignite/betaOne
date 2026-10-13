@@ -1,0 +1,122 @@
+[
+  {
+    "content": "Configure Sanctum API authentication middleware",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Create auth controllers for authentication flow",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Add protected API routes with versioning",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Implement role-based access control",
+    "status": "completed",
+    "priority": "high",
+    "id": "4"
+  },
+  {
+    "content": "Create Heir model and migration",
+    "status": "completed",
+    "priority": "medium",
+    "id": "5"
+  },
+  {
+    "content": "Create Skill and SkillGap models and migrations",
+    "status": "completed",
+    "priority": "medium",
+    "id": "6"
+  },
+  {
+    "content": "Create TacitKnowledge and Prompt models and migrations",
+    "status": "completed",
+    "priority": "medium",
+    "id": "7"
+  },
+  {
+    "content": "Create Scenario and Simulation models and migrations",
+    "status": "completed",
+    "priority": "medium",
+    "id": "8"
+  },
+  {
+    "content": "Set up model relationships",
+    "status": "completed",
+    "priority": "medium",
+    "id": "9"
+  },
+  {
+    "content": "Create API resource controllers",
+    "status": "completed",
+    "priority": "medium",
+    "id": "10"
+  },
+  {
+    "content": "Customize dashboard component for legaci metrics",
+    "status": "pending",
+    "priority": "medium",
+    "id": "11"
+  },
+  {
+    "content": "Update sidebar navigation for project features",
+    "status": "pending",
+    "priority": "medium",
+    "id": "12"
+  },
+  {
+    "content": "Create API service layer",
+    "status": "completed",
+    "priority": "medium",
+    "id": "13"
+  },
+  {
+    "content": "Set up axios interceptors",
+    "status": "completed",
+    "priority": "medium",
+    "id": "14"
+  },
+  {
+    "content": "Create custom React hooks for data fetching",
+    "status": "in_progress",
+    "priority": "medium",
+    "id": "15"
+  },
+  {
+    "content": "Configure Redis for real-time features",
+    "status": "pending",
+    "priority": "low",
+    "id": "16"
+  },
+  {
+    "content": "Add environment variables",
+    "status": "pending",
+    "priority": "low",
+    "id": "17"
+  },
+  {
+    "content": "Create database seeders",
+    "status": "pending",
+    "priority": "low",
+    "id": "18"
+  },
+  {
+    "content": "Add TypeScript types for API responses",
+    "status": "completed",
+    "priority": "low",
+    "id": "19"
+  },
+  {
+    "content": "Set up testing frameworks",
+    "status": "pending",
+    "priority": "low",
+    "id": "20"
+  }
+]

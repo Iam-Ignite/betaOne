@@ -9,6 +9,8 @@
     "start:prod": "tsx src/index.ts",
     "set-webhook": "dotenv -e ../../.env -- tsx scripts/set-webhook.ts",
     "create-helius-webhook": "dotenv -e ../../.env -- tsx scripts/create-helius-webhook.ts",
+    "reconcile": "dotenv -e ../../.env -- tsx scripts/reconcile.ts",
+    "migrate-kms": "dotenv -e ../../.env -- tsx scripts/migrate-kms.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

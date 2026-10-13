@@ -1,0 +1,80 @@
+[
+  {
+    "content": "Create database migrations for circuit models and related tables",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Create Laravel models for CircuitModel, Preset, AudioProject",
+    "status": "in_progress",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Set up Laravel Sanctum for API authentication",
+    "status": "pending",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Create API controllers for circuit modeling functionality",
+    "status": "pending",
+    "priority": "high",
+    "id": "4"
+  },
+  {
+    "content": "Implement service layer for AI circuit modeling logic",
+    "status": "pending",
+    "priority": "high",
+    "id": "5"
+  },
+  {
+    "content": "Create API routes for circuit modeling endpoints",
+    "status": "pending",
+    "priority": "medium",
+    "id": "6"
+  },
+  {
+    "content": "Create TypeScript interfaces for circuit modeling data types",
+    "status": "pending",
+    "priority": "high",
+    "id": "7"
+  },
+  {
+    "content": "Build React components for circuit modeling UI",
+    "status": "pending",
+    "priority": "high",
+    "id": "8"
+  },
+  {
+    "content": "Implement custom hooks for audio context and circuit models",
+    "status": "pending",
+    "priority": "medium",
+    "id": "9"
+  },
+  {
+    "content": "Create services for API communication in frontend",
+    "status": "pending",
+    "priority": "medium",
+    "id": "10"
+  },
+  {
+    "content": "Add circuit modeling pages to the application",
+    "status": "pending",
+    "priority": "medium",
+    "id": "11"
+  },
+  {
+    "content": "Write Pest tests for backend functionality",
+    "status": "pending",
+    "priority": "low",
+    "id": "12"
+  },
+  {
+    "content": "Add Vitest tests for React components",
+    "status": "pending",
+    "priority": "low",
+    "id": "13"
+  }
+]

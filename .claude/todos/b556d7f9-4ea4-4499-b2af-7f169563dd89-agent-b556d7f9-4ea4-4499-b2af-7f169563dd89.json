@@ -1,0 +1,26 @@
+[
+  {
+    "content": "Explore the zip folder structure to find all JSON files",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Read the current Sidebaritems.ts file structure",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Generate new sidebar content from JSON files using folder names as headings",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Update the Sidebaritems.ts file with the new content",
+    "status": "completed",
+    "priority": "high",
+    "id": "4"
+  }
+]

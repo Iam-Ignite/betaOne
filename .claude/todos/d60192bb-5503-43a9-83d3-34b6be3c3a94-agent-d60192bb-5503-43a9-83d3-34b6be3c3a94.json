@@ -1,0 +1,62 @@
+[
+  {
+    "content": "Analyze existing codebase structure and patterns",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Create database migrations for family values assessment",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Create backend models for assessment functionality",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Implement API controllers and routes",
+    "status": "completed",
+    "priority": "high",
+    "id": "4"
+  },
+  {
+    "content": "Create TypeScript interfaces for frontend",
+    "status": "completed",
+    "priority": "medium",
+    "id": "5"
+  },
+  {
+    "content": "Build React components for assessment UI",
+    "status": "completed",
+    "priority": "medium",
+    "id": "6"
+  },
+  {
+    "content": "Implement data fetching hooks",
+    "status": "completed",
+    "priority": "medium",
+    "id": "7"
+  },
+  {
+    "content": "Add API service layer for frontend",
+    "status": "completed",
+    "priority": "medium",
+    "id": "8"
+  },
+  {
+    "content": "Write backend tests with Pest",
+    "status": "completed",
+    "priority": "low",
+    "id": "9"
+  },
+  {
+    "content": "Write frontend tests with Vitest",
+    "status": "completed",
+    "priority": "low",
+    "id": "10"
+  }
+]

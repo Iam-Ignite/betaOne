@@ -1,0 +1,32 @@
+[
+  {
+    "content": "Configure API authentication (Sanctum setup, auth controllers, protected routes, RBAC)",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Create initial data models (models, migrations, relationships, resource controllers)",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Update starter kit dashboard component (metrics, widgets, API integration, navigation, design)",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Set up API integration (service layer, axios interceptors, custom hooks, caching, real-time)",
+    "status": "completed",
+    "priority": "high",
+    "id": "4"
+  },
+  {
+    "content": "Configure development helpers (env vars, seeders, TypeScript types, testing, linting)",
+    "status": "completed",
+    "priority": "high",
+    "id": "5"
+  }
+]

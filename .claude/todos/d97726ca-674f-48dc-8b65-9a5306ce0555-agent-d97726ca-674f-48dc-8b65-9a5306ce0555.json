@@ -1,0 +1,116 @@
+[
+  {
+    "content": "Configure Sanctum authentication middleware and setup",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Create auth controllers for API authentication",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Add protected API routes with versioning",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Implement role-based access control",
+    "status": "completed",
+    "priority": "high",
+    "id": "4"
+  },
+  {
+    "content": "Create data models for succession planning domain",
+    "status": "completed",
+    "priority": "high",
+    "id": "5"
+  },
+  {
+    "content": "Create database migrations for models",
+    "status": "completed",
+    "priority": "high",
+    "id": "6"
+  },
+  {
+    "content": "Set up model relationships",
+    "status": "completed",
+    "priority": "high",
+    "id": "7"
+  },
+  {
+    "content": "Add resource controllers with API versioning",
+    "status": "completed",
+    "priority": "high",
+    "id": "8"
+  },
+  {
+    "content": "Update dashboard component with legaci metrics",
+    "status": "completed",
+    "priority": "medium",
+    "id": "9"
+  },
+  {
+    "content": "Add data display widgets using shadcn/ui",
+    "status": "completed",
+    "priority": "medium",
+    "id": "10"
+  },
+  {
+    "content": "Update sidebar navigation for project features",
+    "status": "completed",
+    "priority": "medium",
+    "id": "11"
+  },
+  {
+    "content": "Create API service layer",
+    "status": "completed",
+    "priority": "high",
+    "id": "12"
+  },
+  {
+    "content": "Add axios interceptors for auth and error handling",
+    "status": "completed",
+    "priority": "high",
+    "id": "13"
+  },
+  {
+    "content": "Create custom hooks for data fetching",
+    "status": "completed",
+    "priority": "medium",
+    "id": "14"
+  },
+  {
+    "content": "Add environment variables configuration",
+    "status": "completed",
+    "priority": "high",
+    "id": "15"
+  },
+  {
+    "content": "Create database seeders for test data",
+    "status": "completed",
+    "priority": "medium",
+    "id": "16"
+  },
+  {
+    "content": "Add TypeScript types for API responses",
+    "status": "completed",
+    "priority": "medium",
+    "id": "17"
+  },
+  {
+    "content": "Configure testing frameworks (Pest and Vitest)",
+    "status": "in_progress",
+    "priority": "low",
+    "id": "18"
+  },
+  {
+    "content": "Configure ESLint/Prettier standards",
+    "status": "pending",
+    "priority": "low",
+    "id": "19"
+  }
+]

@@ -5,6 +5,7 @@ import { telegramWebhook } from "./routes/telegram";
 import { heliusRouter } from "./routes/helius";
 import { miniRouter } from "./routes/mini";
 import { adminRouter } from "./routes/admin";
+import { healthRouter } from "./routes/health";
 
 export const app = express();
 
@@ -20,6 +21,9 @@ app.use(express.json({ limit: "1mb" }));
 app.get("/health", (_req, res) => {
   res.type("text/plain").send("ok");
 });
+
+// Health / metrics (no auth — for uptime monitors, Prometheus).
+app.use(healthRouter);
 
 // Telegram updates (grammY webhook; secret token verified by the adapter).
 app.post("/telegram", telegramWebhook);

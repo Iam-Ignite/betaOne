@@ -1,0 +1,26 @@
+[
+  {
+    "content": "Analyze current data fetching architecture",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Design solution for fetching all categories at once with progressive loading",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Implement the new data fetching strategy",
+    "status": "in_progress",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Handle empty categories to prevent data flashing",
+    "status": "pending",
+    "priority": "medium",
+    "id": "4"
+  }
+]

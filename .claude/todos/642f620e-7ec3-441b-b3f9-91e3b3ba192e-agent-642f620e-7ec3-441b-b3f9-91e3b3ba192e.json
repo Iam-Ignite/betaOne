@@ -1,0 +1,20 @@
+[
+  {
+    "content": "Replace API calls with dummy data in menu page",
+    "status": "pending",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Create mock data for menus and menu items",
+    "status": "pending",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Update menu operations to use local state instead of API",
+    "status": "pending",
+    "priority": "high",
+    "id": "3"
+  }
+]

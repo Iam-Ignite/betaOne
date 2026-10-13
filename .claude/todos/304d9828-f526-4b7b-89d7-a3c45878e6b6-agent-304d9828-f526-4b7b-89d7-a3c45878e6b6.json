@@ -1,0 +1,44 @@
+[
+  {
+    "content": "Analyze current dual sidebar system",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Design unified sidebar component",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Update main Sidebar for responsive behavior",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Remove MobileSidebar component",
+    "status": "completed",
+    "priority": "high",
+    "id": "4"
+  },
+  {
+    "content": "Update FullLayout to remove MobileSidebar",
+    "status": "completed",
+    "priority": "high",
+    "id": "5"
+  },
+  {
+    "content": "Update state management",
+    "status": "completed",
+    "priority": "high",
+    "id": "6"
+  },
+  {
+    "content": "Test unified sidebar",
+    "status": "completed",
+    "priority": "medium",
+    "id": "7"
+  }
+]

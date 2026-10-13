@@ -1,0 +1,92 @@
+[
+  {
+    "content": "Investigate login to dashboard delay issue",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Extend search functionality beyond menu tab",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Fix broken table sorting across all tables",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Add sorting functionality to booking tab",
+    "status": "completed",
+    "priority": "medium",
+    "id": "4"
+  },
+  {
+    "content": "Fix 'No items' display delay during order creation",
+    "status": "completed",
+    "priority": "medium",
+    "id": "5"
+  },
+  {
+    "content": "Improve order category selection responsiveness",
+    "status": "completed",
+    "priority": "medium",
+    "id": "6"
+  },
+  {
+    "content": "Remove unused 'Create Payment' button",
+    "status": "completed",
+    "priority": "low",
+    "id": "7"
+  },
+  {
+    "content": "Implement automatic logout on 401 responses",
+    "status": "completed",
+    "priority": "high",
+    "id": "8"
+  },
+  {
+    "content": "Analyze current order data loading strategy",
+    "status": "completed",
+    "priority": "high",
+    "id": "9"
+  },
+  {
+    "content": "Design optimized background pre-loading approach",
+    "status": "completed",
+    "priority": "high",
+    "id": "10"
+  },
+  {
+    "content": "Create enhanced useOrder hook with background fetching",
+    "status": "completed",
+    "priority": "high",
+    "id": "11"
+  },
+  {
+    "content": "Update OrdersList component for instant category switching",
+    "status": "completed",
+    "priority": "high",
+    "id": "12"
+  },
+  {
+    "content": "Update order page for background pre-loading",
+    "status": "completed",
+    "priority": "medium",
+    "id": "13"
+  },
+  {
+    "content": "Test and verify background pre-loading functionality",
+    "status": "completed",
+    "priority": "medium",
+    "id": "14"
+  },
+  {
+    "content": "Document implementation and clean up warnings",
+    "status": "completed",
+    "priority": "low",
+    "id": "15"
+  }
+]

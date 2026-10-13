@@ -1,0 +1,56 @@
+[
+  {
+    "content": "Analyze project structure and understand audioscape application",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Create database models and migrations for sweet spot finder",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Implement API controllers and routes",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Create service layer for sweet spot analysis logic",
+    "status": "in_progress",
+    "priority": "high",
+    "id": "4"
+  },
+  {
+    "content": "Create TypeScript interfaces for frontend",
+    "status": "pending",
+    "priority": "medium",
+    "id": "5"
+  },
+  {
+    "content": "Build React components using shadcn/ui",
+    "status": "pending",
+    "priority": "medium",
+    "id": "6"
+  },
+  {
+    "content": "Implement data fetching with custom hooks",
+    "status": "pending",
+    "priority": "medium",
+    "id": "7"
+  },
+  {
+    "content": "Write Pest tests for backend functionality",
+    "status": "pending",
+    "priority": "low",
+    "id": "8"
+  },
+  {
+    "content": "Add Vitest tests for React components",
+    "status": "pending",
+    "priority": "low",
+    "id": "9"
+  }
+]

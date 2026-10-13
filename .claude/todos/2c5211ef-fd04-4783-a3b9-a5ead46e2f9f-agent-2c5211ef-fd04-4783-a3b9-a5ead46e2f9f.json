@@ -1,0 +1,26 @@
+[
+  {
+    "content": "Update FullLayout.tsx to use responsive sidebar rendering (MobileSidebar for mobile, Sidebar for desktop)",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Update Sidebar.tsx to remove mobile-specific code and focus on desktop only",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Enhance MobileSidebar.tsx for better animation and UX",
+    "status": "completed",
+    "priority": "medium",
+    "id": "3"
+  },
+  {
+    "content": "Test the sidebar functionality on both mobile and desktop",
+    "status": "completed",
+    "priority": "medium",
+    "id": "4"
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "content": "Update getCategoryDetails to handle all loading states properly",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Fix menuData construction to show all categories immediately",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Ensure proper data flow for instant category switching",
+    "status": "completed",
+    "priority": "medium",
+    "id": "3"
+  },
+  {
+    "content": "Update useAllMenuData to match booking page logic - fetch only selected category",
+    "status": "completed",
+    "priority": "high",
+    "id": "4"
+  },
+  {
+    "content": "Remove preloading logic and use on-demand fetching like bookings",
+    "status": "completed",
+    "priority": "high",
+    "id": "5"
+  }
+]

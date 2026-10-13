@@ -1,0 +1,32 @@
+[
+  {
+    "content": "Check and fix submitBookingStatus utility function",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Update useBookings hook to properly filter by category",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Fix BookingsList to handle filtered data correctly",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Verify and fix totalCount display in tabs",
+    "status": "completed",
+    "priority": "medium",
+    "id": "4"
+  },
+  {
+    "content": "Test all booking functionality after fixes",
+    "status": "completed",
+    "priority": "high",
+    "id": "5"
+  }
+]

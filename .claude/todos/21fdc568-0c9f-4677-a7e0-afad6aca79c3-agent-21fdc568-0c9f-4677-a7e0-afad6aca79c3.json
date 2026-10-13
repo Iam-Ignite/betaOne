@@ -1,0 +1,50 @@
+[
+  {
+    "content": "Analyze project structure and understand existing patterns",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Create database models and migrations for Harmonic Saturation Profile",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Implement API controllers and routes",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Create TypeScript interfaces and types",
+    "status": "completed",
+    "priority": "high",
+    "id": "4"
+  },
+  {
+    "content": "Build React components for the designer UI",
+    "status": "in_progress",
+    "priority": "high",
+    "id": "5"
+  },
+  {
+    "content": "Implement data fetching hooks",
+    "status": "completed",
+    "priority": "medium",
+    "id": "6"
+  },
+  {
+    "content": "Add Pest tests for backend",
+    "status": "pending",
+    "priority": "medium",
+    "id": "7"
+  },
+  {
+    "content": "Add Vitest tests for frontend",
+    "status": "pending",
+    "priority": "medium",
+    "id": "8"
+  }
+]

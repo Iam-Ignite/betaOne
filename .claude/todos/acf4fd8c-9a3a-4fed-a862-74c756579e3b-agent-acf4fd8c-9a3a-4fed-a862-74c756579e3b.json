@@ -1,0 +1,86 @@
+[
+  {
+    "content": "Analyze project structure and understand existing patterns",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Create database migrations for harmonic saturation profiles",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Create backend models for harmonic saturation profiles",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Implement API controllers and routes",
+    "status": "completed",
+    "priority": "high",
+    "id": "4"
+  },
+  {
+    "content": "Create TypeScript interfaces for frontend",
+    "status": "completed",
+    "priority": "high",
+    "id": "5"
+  },
+  {
+    "content": "Build React components for the designer UI",
+    "status": "completed",
+    "priority": "high",
+    "id": "6"
+  },
+  {
+    "content": "Implement data fetching hooks",
+    "status": "completed",
+    "priority": "high",
+    "id": "7"
+  },
+  {
+    "content": "Write backend tests with Pest",
+    "status": "completed",
+    "priority": "medium",
+    "id": "8"
+  },
+  {
+    "content": "Write frontend tests with Vitest",
+    "status": "in_progress",
+    "priority": "medium",
+    "id": "9"
+  },
+  {
+    "content": "Check remaining components - saturation curve editor",
+    "status": "completed",
+    "priority": "high",
+    "id": "10"
+  },
+  {
+    "content": "Check remaining components - frequency band editor",
+    "status": "completed",
+    "priority": "high",
+    "id": "11"
+  },
+  {
+    "content": "Check remaining components - profile preview",
+    "status": "completed",
+    "priority": "high",
+    "id": "12"
+  },
+  {
+    "content": "Create main harmonic saturation page",
+    "status": "completed",
+    "priority": "high",
+    "id": "13"
+  },
+  {
+    "content": "Add navigation and routing",
+    "status": "completed",
+    "priority": "high",
+    "id": "14"
+  }
+]

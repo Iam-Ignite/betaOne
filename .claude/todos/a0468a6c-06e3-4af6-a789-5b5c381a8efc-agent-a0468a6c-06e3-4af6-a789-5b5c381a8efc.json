@@ -1,0 +1,26 @@
+[
+  {
+    "content": "Update CSS media query to only hide sidebars below 768px",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Update Sidebar.tsx to show on md and above with proper toggle behavior",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Update MobileSidebar.tsx to only show below md breakpoint",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Test sidebar behavior on different screen sizes",
+    "status": "completed",
+    "priority": "medium",
+    "id": "4"
+  }
+]

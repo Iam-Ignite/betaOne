@@ -1,0 +1,26 @@
+[
+  {
+    "content": "Restore original imports and dependencies",
+    "status": "in_progress",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Restore original component structure",
+    "status": "pending",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Restore original data handling logic",
+    "status": "pending",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Restore original useEffect and state management",
+    "status": "pending",
+    "priority": "high",
+    "id": "4"
+  }
+]

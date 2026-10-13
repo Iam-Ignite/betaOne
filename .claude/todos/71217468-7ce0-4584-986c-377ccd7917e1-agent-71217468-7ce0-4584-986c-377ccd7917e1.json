@@ -1,0 +1,44 @@
+[
+  {
+    "content": "Analyze existing project structure and models",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Create TacitKnowledgePrompt model and migration",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Create API controller and routes for tacit knowledge prompts",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Create TypeScript interfaces for frontend",
+    "status": "completed",
+    "priority": "medium",
+    "id": "4"
+  },
+  {
+    "content": "Build React components for tacit knowledge prompts",
+    "status": "completed",
+    "priority": "medium",
+    "id": "5"
+  },
+  {
+    "content": "Implement data fetching hooks",
+    "status": "completed",
+    "priority": "medium",
+    "id": "6"
+  },
+  {
+    "content": "Add routes and navigation",
+    "status": "completed",
+    "priority": "low",
+    "id": "7"
+  }
+]

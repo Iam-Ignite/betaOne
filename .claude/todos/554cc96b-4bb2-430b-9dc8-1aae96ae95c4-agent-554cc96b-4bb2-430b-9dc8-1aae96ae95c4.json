@@ -1,0 +1,14 @@
+[
+  {
+    "content": "Remove early return for loading state in getFilteredBookingDetails",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Add loading state check before rendering table",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  }
+]

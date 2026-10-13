@@ -1,0 +1,62 @@
+[
+  {
+    "content": "Add loading icon on view menu button when adding menu item",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Change 'ALL' order category label to avoid misinformation",
+    "status": "completed",
+    "priority": "medium",
+    "id": "2"
+  },
+  {
+    "content": "Add loading and caching to menu view with navigation sidebars on create order page",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Make quick response table rows clickable",
+    "status": "completed",
+    "priority": "medium",
+    "id": "4"
+  },
+  {
+    "content": "Fix view more details button visibility on each row",
+    "status": "completed",
+    "priority": "high",
+    "id": "5"
+  },
+  {
+    "content": "Add loading state on order page when loading categories",
+    "status": "completed",
+    "priority": "high",
+    "id": "6"
+  },
+  {
+    "content": "Remove image from reservation row page",
+    "status": "completed",
+    "priority": "low",
+    "id": "7"
+  },
+  {
+    "content": "Complete booking and payment functionality for testing",
+    "status": "completed",
+    "priority": "high",
+    "id": "8"
+  },
+  {
+    "content": "Implement 401 error handling to redirect to login page",
+    "status": "completed",
+    "priority": "high",
+    "id": "9"
+  },
+  {
+    "content": "Implement asynchronous loading for table tabs instead of lazy loading",
+    "status": "completed",
+    "priority": "high",
+    "id": "10"
+  }
+]

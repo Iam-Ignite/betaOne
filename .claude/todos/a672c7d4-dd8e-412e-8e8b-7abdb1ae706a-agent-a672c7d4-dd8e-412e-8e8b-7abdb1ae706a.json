@@ -1,0 +1,26 @@
+[
+  {
+    "content": "Update Orders page to handle loading states properly",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Update Bookings page to handle loading states properly",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Update Payments page to handle loading states properly",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Remove refetch calls from useEffect hooks",
+    "status": "completed",
+    "priority": "high",
+    "id": "4"
+  }
+]

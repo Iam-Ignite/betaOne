@@ -1,0 +1,26 @@
+[
+  {
+    "content": "Create reusable DateRangeDisplay component",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Update orders page to include date range display",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Update bookings page to enable date filtering and add date range display",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Update payments page to include date range display",
+    "status": "completed",
+    "priority": "medium",
+    "id": "4"
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "content": "Analyze project structure and existing patterns",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Create database migration for harmonic saturation profiles",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Create Eloquent model for HarmonicSaturationProfile",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Implement API controller with CRUD operations",
+    "status": "completed",
+    "priority": "high",
+    "id": "4"
+  },
+  {
+    "content": "Add API routes for harmonic saturation profiles",
+    "status": "completed",
+    "priority": "high",
+    "id": "5"
+  },
+  {
+    "content": "Create TypeScript interfaces for frontend",
+    "status": "completed",
+    "priority": "high",
+    "id": "6"
+  },
+  {
+    "content": "Build React components for the profile designer",
+    "status": "in_progress",
+    "priority": "high",
+    "id": "7"
+  },
+  {
+    "content": "Implement custom hooks for data fetching",
+    "status": "pending",
+    "priority": "high",
+    "id": "8"
+  },
+  {
+    "content": "Add Pest tests for backend functionality",
+    "status": "pending",
+    "priority": "medium",
+    "id": "9"
+  },
+  {
+    "content": "Add Vitest tests for React components",
+    "status": "pending",
+    "priority": "medium",
+    "id": "10"
+  }
+]

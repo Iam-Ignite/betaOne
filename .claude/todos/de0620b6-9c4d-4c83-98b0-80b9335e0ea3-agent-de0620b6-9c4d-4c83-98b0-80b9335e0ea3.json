@@ -1,0 +1,56 @@
+[
+  {
+    "content": "Analyze project structure and understand existing patterns",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Create database migrations for skill gap analyzer",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Create models for skill gap analyzer",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Implement API controllers and routes",
+    "status": "completed",
+    "priority": "high",
+    "id": "4"
+  },
+  {
+    "content": "Create TypeScript interfaces for frontend",
+    "status": "completed",
+    "priority": "high",
+    "id": "5"
+  },
+  {
+    "content": "Build React components for skill gap analyzer",
+    "status": "in_progress",
+    "priority": "high",
+    "id": "6"
+  },
+  {
+    "content": "Implement data fetching hooks",
+    "status": "pending",
+    "priority": "high",
+    "id": "7"
+  },
+  {
+    "content": "Write backend tests",
+    "status": "pending",
+    "priority": "medium",
+    "id": "8"
+  },
+  {
+    "content": "Write frontend tests",
+    "status": "pending",
+    "priority": "medium",
+    "id": "9"
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "content": "Remove artificial delay from reservation details page",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Standardize loading components across all pages",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Fix loading state logic to only show when isLoading is true",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  }
+]

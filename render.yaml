@@ -78,3 +78,39 @@ services:
         value: "false"
       - key: WORKER_KEEPALIVE_MS
         value: "600000"
+
+# Optional: Daily reconciliation cron job (runs at 03:00 UTC).
+# Uncomment and add to your Render dashboard as a separate "Cron Job" service:
+# jobs:
+#   - type: cron
+#     name: copytrade-reconcile
+#     runtime: node
+#     plan: free
+#     region: oregon
+#     rootDir: .
+#     buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @copytrade/core db:generate
+#     schedule: "0 3 * * *"  # 03:00 UTC daily
+#     startCommand: pnpm --filter server reconcile
+#     envVars:
+#       - key: DATABASE_URL
+#         sync: false
+#       - key: DIRECT_URL
+#         sync: false
+#       - key: HELIUS_RPC_URL
+#         sync: false
+#       - key: HELIUS_API_KEY
+#         sync: false
+#       - key: EVM_RPC_URL
+#         sync: false
+#       - key: OPERATOR_SOL_ADDRESS
+#         sync: false
+#       - key: TELEGRAM_ADMIN_CHAT_ID
+#         sync: false
+#       - key: WALLET_KEK_BASE64
+#         sync: false
+#       - key: TRADING_ENABLED
+#         sync: false
+#       - key: LIVE_TRADING_ALLOWED
+#         sync: false
+#       - key: SIMULATE_TRADING
+#         sync: false

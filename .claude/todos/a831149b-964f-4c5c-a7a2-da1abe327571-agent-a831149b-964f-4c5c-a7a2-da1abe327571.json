@@ -1,0 +1,26 @@
+[
+  {
+    "content": "Clean up unused imports and variables from diagnostics",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Remove unused dragStartTime and hasDraggedMinDistance variables",
+    "status": "completed",
+    "priority": "medium",
+    "id": "2"
+  },
+  {
+    "content": "Verify input bar is always visible and properly positioned",
+    "status": "completed",
+    "priority": "medium",
+    "id": "3"
+  },
+  {
+    "content": "Test the refined component functionality",
+    "status": "completed",
+    "priority": "low",
+    "id": "4"
+  }
+]

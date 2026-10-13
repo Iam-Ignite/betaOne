@@ -1,0 +1,26 @@
+[
+  {
+    "content": "Fix Orders component tab switching - clear data immediately and remove setTimeout",
+    "status": "completed",
+    "priority": "high",
+    "id": "14"
+  },
+  {
+    "content": "Fix Payments component tab switching - clear data immediately and remove setTimeout",
+    "status": "completed",
+    "priority": "high",
+    "id": "15"
+  },
+  {
+    "content": "Review and fix Campaigns component if needed",
+    "status": "completed",
+    "priority": "medium",
+    "id": "16"
+  },
+  {
+    "content": "Add enhanced loading states for better UX",
+    "status": "completed",
+    "priority": "low",
+    "id": "17"
+  }
+]

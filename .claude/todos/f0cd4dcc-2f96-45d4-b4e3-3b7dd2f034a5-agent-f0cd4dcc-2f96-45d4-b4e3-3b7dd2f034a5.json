@@ -1,0 +1,68 @@
+[
+  {
+    "content": "Analyze existing codebase structure and scenario-related files",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Create/update backend models for scenario simulator",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Create migrations for scenario simulator tables",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Implement API controllers for scenario simulator",
+    "status": "completed",
+    "priority": "high",
+    "id": "4"
+  },
+  {
+    "content": "Add API routes for scenario simulator",
+    "status": "completed",
+    "priority": "high",
+    "id": "5"
+  },
+  {
+    "content": "Create TypeScript interfaces for scenario data",
+    "status": "completed",
+    "priority": "medium",
+    "id": "6"
+  },
+  {
+    "content": "Build React components for scenario simulator UI",
+    "status": "completed",
+    "priority": "medium",
+    "id": "7"
+  },
+  {
+    "content": "Implement custom hooks for data fetching",
+    "status": "in_progress",
+    "priority": "medium",
+    "id": "8"
+  },
+  {
+    "content": "Add error handling and loading states",
+    "status": "pending",
+    "priority": "medium",
+    "id": "9"
+  },
+  {
+    "content": "Write backend tests with Pest",
+    "status": "pending",
+    "priority": "low",
+    "id": "10"
+  },
+  {
+    "content": "Write frontend tests with Vitest",
+    "status": "pending",
+    "priority": "low",
+    "id": "11"
+  }
+]

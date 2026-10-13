@@ -1,0 +1,26 @@
+[
+  {
+    "content": "Remove unused props from ChatHistoryManager FloatingChatHistory call",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Clean up drag state in ChatHistoryManager",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Update FullLayout to remove drag state management",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Clean up unused drag code in FloatingTabBar",
+    "status": "completed",
+    "priority": "medium",
+    "id": "4"
+  }
+]

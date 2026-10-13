@@ -1,0 +1,56 @@
+[
+  {
+    "content": "Create database models and migrations for Harmonic Saturation Profiles",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Implement API controllers and routes for Harmonic Saturation",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Create service layer for complex harmonic saturation logic",
+    "status": "completed",
+    "priority": "medium",
+    "id": "3"
+  },
+  {
+    "content": "Create TypeScript interfaces for harmonic saturation data types",
+    "status": "completed",
+    "priority": "high",
+    "id": "4"
+  },
+  {
+    "content": "Build React components for Harmonic Saturation Profile Designer",
+    "status": "completed",
+    "priority": "high",
+    "id": "5"
+  },
+  {
+    "content": "Implement custom hooks for data fetching",
+    "status": "completed",
+    "priority": "medium",
+    "id": "6"
+  },
+  {
+    "content": "Add validation and authorization for API endpoints",
+    "status": "completed",
+    "priority": "medium",
+    "id": "7"
+  },
+  {
+    "content": "Write Pest tests for backend functionality",
+    "status": "pending",
+    "priority": "low",
+    "id": "8"
+  },
+  {
+    "content": "Add Vitest tests for React components",
+    "status": "pending",
+    "priority": "low",
+    "id": "9"
+  }
+]

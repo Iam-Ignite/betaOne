@@ -1,0 +1,8 @@
+[
+  {
+    "content": "Revert FullLayout.tsx changes back to original sticky positioning",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  }
+]

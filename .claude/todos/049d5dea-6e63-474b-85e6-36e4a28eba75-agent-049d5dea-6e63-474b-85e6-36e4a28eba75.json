@@ -1,0 +1,68 @@
+[
+  {
+    "content": "Update global styles and Tailwind config with modern design tokens",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Create reusable button component with variants",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Create modern input and form components",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Create card and container components",
+    "status": "completed",
+    "priority": "high",
+    "id": "4"
+  },
+  {
+    "content": "Modernize navigation bar with better UX",
+    "status": "completed",
+    "priority": "high",
+    "id": "5"
+  },
+  {
+    "content": "Update authentication pages with modern design",
+    "status": "completed",
+    "priority": "medium",
+    "id": "6"
+  },
+  {
+    "content": "Polish landing page with animations",
+    "status": "completed",
+    "priority": "medium",
+    "id": "7"
+  },
+  {
+    "content": "Redesign admin and user dashboards",
+    "status": "completed",
+    "priority": "medium",
+    "id": "8"
+  },
+  {
+    "content": "Add toast notifications system",
+    "status": "pending",
+    "priority": "low",
+    "id": "9"
+  },
+  {
+    "content": "Implement dark mode support",
+    "status": "pending",
+    "priority": "low",
+    "id": "10"
+  },
+  {
+    "content": "Add final polish and testing",
+    "status": "completed",
+    "priority": "high",
+    "id": "11"
+  }
+]

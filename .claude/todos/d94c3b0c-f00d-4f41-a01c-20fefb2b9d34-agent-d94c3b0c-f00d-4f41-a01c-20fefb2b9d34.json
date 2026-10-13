@@ -1,0 +1,50 @@
+[
+  {
+    "content": "Analyze project structure and understand the Legacy Business Scenario Simulator requirements",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Create backend models and migrations for scenario simulator",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Implement API controllers and routes for scenario simulator",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Create TypeScript interfaces for frontend data types",
+    "status": "completed",
+    "priority": "high",
+    "id": "4"
+  },
+  {
+    "content": "Build React components for scenario simulator UI",
+    "status": "completed",
+    "priority": "high",
+    "id": "5"
+  },
+  {
+    "content": "Implement data fetching with custom hooks",
+    "status": "in_progress",
+    "priority": "high",
+    "id": "6"
+  },
+  {
+    "content": "Write tests for backend functionality",
+    "status": "pending",
+    "priority": "medium",
+    "id": "7"
+  },
+  {
+    "content": "Write tests for frontend components",
+    "status": "pending",
+    "priority": "medium",
+    "id": "8"
+  }
+]
