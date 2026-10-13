@@ -24,7 +24,7 @@ bot.command("start", (ctx) => {
   const w = ctx.user.wallet;
   const evmLabel = escapeHtml(env.EVM_USDT_NETWORK);
   let body =
-    `🚀 <b>Welcome to P.R.I.M.E Copy Trade Bot</b> 🚀\n\n` +
+    `🚀 <b>Welcome to Primecopytradebot</b> 🚀\n\n` +
     `Hello ${greeting(ctx)}! Welcome to our advanced copytrading platform.`;
 
   if (w?.address && w.evmAddress) {

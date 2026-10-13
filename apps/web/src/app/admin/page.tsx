@@ -85,7 +85,7 @@ export default async function Admin() {
               P
             </span>
             <div>
-              <h1 className="text-base font-semibold leading-tight">P.R.I.M.E Admin</h1>
+              <h1 className="text-base font-semibold leading-tight">Primecopytradebot Admin</h1>
               <p className="text-xs text-zinc-500">Copy-trade control panel</p>
             </div>
           </div>
