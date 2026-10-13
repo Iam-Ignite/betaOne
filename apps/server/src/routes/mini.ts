@@ -10,11 +10,17 @@ miniRouter.post("/mini/follows", async (req, res) => {
   const tg = initData ? validateInitData(initData, process.env.TELEGRAM_BOT_TOKEN ?? "") : null;
   if (!tg) return res.status(401).json({ error: "invalid initData" });
 
-  const user = await db.user.findUnique({
+  // Auto-create user if they haven't started the bot yet (like bot middleware does)
+  let user = await db.user.findUnique({
     where: { telegramId: BigInt(tg.id) },
     include: { wallet: true, follows: { include: { trader: true } } },
   });
-  if (!user) return res.status(404).json({ error: "user not found" });
+  if (!user) {
+    user = await db.user.create({
+      data: { telegramId: BigInt(tg.id), username: tg.username },
+      include: { wallet: true, follows: { include: { trader: true } } },
+    });
+  }
 
   res.json({
     wallet: user.wallet?.address ?? null,
