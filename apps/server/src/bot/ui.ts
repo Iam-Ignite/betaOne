@@ -59,7 +59,7 @@ export function followKeyboard(f: {
   return new InlineKeyboard()
     .text(f.active ? "⏸ Pause" : "▶️ Start", `ct:toggle:${f.id}`)
     .row()
-    .text(f.paper ? "📝 Paper: ON → go live" : "💵 LIVE → back to paper", `ct:mode:${f.id}`)
+    .text(f.paper ? "💵 Enable live trading" : "🛑 Disable live trading", `ct:mode:${f.id}`)
     .row()
     .text("0.02", `ct:amt:${f.id}:20000000`)
     .text("0.05", `ct:amt:${f.id}:50000000`)
@@ -78,7 +78,6 @@ export function followText(f: {
 }) {
   return (
     `<b>${f.trader.label}</b>\n<code>${f.trader.address}</code>\n\n` +
-    `Mode: ${f.paper ? "📝 paper" : "💵 LIVE"}\n` +
     `Buy size: ${fmtSol(f.buyLamports)} SOL (max ${fmtSol(f.maxLamports)})\n` +
     `Slippage: ${f.slippageBps / 100}%\nStatus: ${f.active ? "🟢 on" : "⚪️ off"}`
   );

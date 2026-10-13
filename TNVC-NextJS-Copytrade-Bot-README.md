@@ -744,7 +744,7 @@ const mainMenu = new InlineKeyboard()
 bot.command("start", (ctx) =>
   ctx.reply(
     "🚀 <b>Copytrading bot</b>\n\nFollow a wallet and the bot mirrors its swaps from your own wallet.\n\n" +
-    "⚠️ Trading is risky and you can lose everything you deposit. Start in paper mode.",
+    "⚠️ Trading is risky and you can lose everything you deposit.",
     { parse_mode: "HTML", reply_markup: mainMenu },
   ));
 
@@ -868,10 +868,10 @@ Extra withdrawal protections to add before real money: a cooldown (for example 1
 bot.command("copytrade", async (ctx) => {
   const follows = await db.follow.findMany({ where: { userId: ctx.user.id }, include: { trader: true } });
   const kb = new InlineKeyboard().text("➕ Follow a wallet", "ct:add").row();
-  follows.forEach((f) => kb.text(`${f.active ? "🟢" : "⚪️"} ${f.trader.label}${f.paper ? " (paper)" : ""}`, `ct:open:${f.id}`).row());
+  follows.forEach((f) => kb.text(`${f.active ? "🟢" : "⚪️"} ${f.trader.label}`, `ct:open:${f.id}`).row());
   const curated = await db.trader.findMany({ where: { active: true }, take: 5 });
   curated.forEach((t) => kb.text(`⭐ ${t.label}`, `ct:follow:${t.id}`).row());
-  return ctx.reply("📈 <b>Copytrade</b>\nPick a trader to follow. New follows start in <b>paper mode</b> (no real money).",
+  return ctx.reply("📈 <b>Copytrade</b>\nPick a trader to follow.",
     { parse_mode: "HTML", reply_markup: kb });
 });
 
@@ -898,13 +898,13 @@ async function showFollow(ctx: any, followId: string) {
   const f = await db.follow.findUniqueOrThrow({ where: { id: followId }, include: { trader: true } });
   const kb = new InlineKeyboard()
     .text(f.active ? "⏸ Pause" : "▶️ Start", `ct:toggle:${f.id}`).row()
-    .text(f.paper ? "📝 Paper: ON → go live" : "💵 LIVE → back to paper", `ct:mode:${f.id}`).row()
+    .text(f.paper ? "💵 Enable live trading" : "🛑 Disable live trading", `ct:mode:${f.id}`).row()
     .text("0.02", `ct:amt:${f.id}:20000000`).text("0.05", `ct:amt:${f.id}:50000000`)
     .text("0.1", `ct:amt:${f.id}:100000000`).row()
     .text("🗑 Unfollow", `ct:del:${f.id}`);
   await ctx.reply(
     `<b>${f.trader.label}</b>\n<code>${f.trader.address}</code>\n\n` +
-    `Mode: ${f.paper ? "📝 paper" : "💵 LIVE"}\nBuy size: ${fmtSol(f.buyLamports)} SOL (max ${fmtSol(f.maxLamports)})\n` +
+    `Buy size: ${fmtSol(f.buyLamports)} SOL (max ${fmtSol(f.maxLamports)})\n` +
     `Slippage: ${f.slippageBps / 100}%\nStatus: ${f.active ? "🟢 on" : "⚪️ off"}`,
     { parse_mode: "HTML", reply_markup: kb });
 }
@@ -1155,7 +1155,7 @@ export async function processCopyOrder(orderId: string) {
       }
       await finish(order.id, { status: "CONFIRMED", inAmountRaw: amount.toString(), outAmountRaw: out.toString() });
       const pnl = plan.kind === "sell" && paperPos ? ` (P/L ${fmtSol(out - paperPos.costLamports)} SOL)` : "";
-      await notify(tg, `📝 <b>Paper ${swap.side}</b> ${swap.tokenMint.slice(0, 6)}…${pnl}`);
+      await notify(tg, `✅ <b>${swap.side}</b> ${swap.tokenMint.slice(0, 6)}…${pnl}`);
       return;
     }
 

@@ -90,7 +90,7 @@ model Follow {
   user         User            @relation(fields: [userId], references: [id])
   trader       Trader          @relation(fields: [traderId], references: [id])
   active       Boolean         @default(false)
-  paper        Boolean         @default(true) // paper mode by default
+  paper        Boolean         @default(false) // live mode by default
   buyLamports  BigInt          @default(50000000) // 0.05 SOL per copied buy
   maxLamports  BigInt          @default(100000000) // hard cap per trade
   slippageBps  Int             @default(1000)

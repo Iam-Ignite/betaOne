@@ -62,7 +62,7 @@ export default function Mini() {
         {data?.follows.map((f) => (
           <li key={f.id} className="rounded-lg border p-3">
             <div className="font-semibold">
-              {f.active ? "🟢" : "⚪️"} {f.trader} {f.paper ? "(paper)" : "(LIVE)"}
+              {f.active ? "🟢" : "⚪️"} {f.trader}
             </div>
             <div className="break-all text-xs text-zinc-500">{f.address}</div>
             <div className="text-sm">

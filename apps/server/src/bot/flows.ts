@@ -262,12 +262,12 @@ bot.command("copytrade", async (ctx) => {
   });
   const kb = new InlineKeyboard().text("➕ Follow a wallet", "ct:add").row();
   follows.forEach((f) =>
-    kb.text(`${f.active ? "🟢" : "⚪️"} ${f.trader.label}${f.paper ? " (paper)" : ""}`, `ct:open:${f.id}`).row(),
+    kb.text(`${f.active ? "🟢" : "⚪️"} ${f.trader.label}`, `ct:open:${f.id}`).row(),
   );
   const curated = await db.trader.findMany({ where: { active: true }, take: 5 });
   curated.forEach((t) => kb.text(`⭐ ${t.label}`, `ct:follow:${t.id}`).row());
   return ctx.reply(
-    "📈 <b>Copytrade</b>\nPick a trader to follow. New follows start in <b>paper mode</b> (no real money).",
+    "📈 <b>Copytrade</b>\nPick a trader to follow.",
     { parse_mode: "HTML", reply_markup: kb },
   );
 });

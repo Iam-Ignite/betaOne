@@ -104,7 +104,7 @@ export async function processCopyOrder(orderId: string) {
       });
       const pnl =
         plan.kind === "sell" && paperPos ? ` (P/L ${fmtSol(out - paperPos.costLamports)} SOL)` : "";
-      await notify(tg, `📝 <b>Paper ${swap.side}</b> ${tokenMint.slice(0, 6)}…${pnl}`);
+      await notify(tg, `✅ <b>${swap.side}</b> ${tokenMint.slice(0, 6)}…${pnl}`);
       return;
     }
 

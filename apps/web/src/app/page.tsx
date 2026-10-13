@@ -29,7 +29,7 @@ export default function Home() {
 
       <p className="rounded-lg border border-red-300/40 bg-red-50 p-4 text-sm text-red-800 dark:bg-red-950/40 dark:text-red-200">
         ⚠️ Not financial advice. Copy trading is risky and you can lose everything you deposit.
-        Past performance is not indicative of future results. Start in paper mode.
+        Past performance is not indicative of future results.
       </p>
     </main>
   );
