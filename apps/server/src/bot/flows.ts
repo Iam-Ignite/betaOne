@@ -226,7 +226,7 @@ bot.on("message:text", async (ctx, next) => {
       return ctx.reply(
         `⏳ <b>${meta.fmt(raw)}</b> withdrawal requested.\n\n` +
           `To: <code>${escapeHtml(to)}</code>\n` +
-          `An operator reviews and sends it manually. Your balance is reserved for this request.`,
+          `Your withdrawal is being processed. This can take more than an hour to complete. Your balance is reserved for this request.`,
         { parse_mode: "HTML" },
       );
     }
