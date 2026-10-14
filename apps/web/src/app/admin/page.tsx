@@ -7,6 +7,7 @@ import {
   type RecentFailure,
   type DashboardStats,
   type PoolWalletData,
+  type PendingCopytrade,
 } from "./admin-actions";
 
 // Admin is a live dashboard: render at request time (never cache).
@@ -66,9 +67,10 @@ export default async function Admin() {
     );
   }
 
-  const [dashRes, usersRes] = await Promise.all([
+  const [dashRes, usersRes, copytradesRes] = await Promise.all([
     backendFetch("/admin/dashboard").catch(() => null),
     backendFetch("/admin/users").catch(() => null),
+    backendFetch("/admin/copytrades").catch(() => null),
   ]);
 
   if (!dashRes || !dashRes.ok) {
@@ -83,6 +85,10 @@ export default async function Admin() {
 
   const { stats, pool, pendingWithdrawals, recentFailed, killSwitch } = (await dashRes.json()) as Dashboard;
   const users = usersRes && usersRes.ok ? ((await usersRes.json()) as UsersResponse).users : [];
+  const pendingCopytrades =
+    copytradesRes && copytradesRes.ok
+      ? ((await copytradesRes.json()) as { pending: PendingCopytrade[] }).pending
+      : [];
 
   return (
     <AdminDashboardView
@@ -92,6 +98,7 @@ export default async function Admin() {
       recentFailed={recentFailed}
       killSwitch={killSwitch}
       users={users}
+      pendingCopytrades={pendingCopytrades}
     />
   );
 }

@@ -10,6 +10,7 @@ export type AdminUser = {
   balances: { SOL: string; USDT: string; BNB: string };
   labels: { SOL: string; USDT: string; BNB: string };
   follows: { total: number; active: number; paper: number; live: number };
+  copytrade: { id: string; address: string } | null;
   wallet: { address: string; evmAddress: string | null } | null;
   pendingWithdrawals: number;
   createdAt: string;
@@ -29,6 +30,15 @@ export type RecentFailure = {
   side: string;
   tokenMint: string;
   error: string | null;
+  createdAt: string;
+};
+
+export type PendingCopytrade = {
+  id: string;
+  telegramId: string;
+  username: string | null;
+  address: string;
+  paper: boolean;
   createdAt: string;
 };
 
@@ -466,9 +476,30 @@ function StatCard({
 /* ------------------------------------------------------------- Users Panel */
 
 export function UsersPanel({ users }: { users: AdminUser[] }) {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "FUNDED" | "ACTIVE" | "FROZEN" | "PENDING">("ALL");
   const [open, setOpen] = useState<string | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  function startTrading(u: AdminUser) {
+    if (!u.copytrade || busy) return;
+    setBusy(`ct-${u.telegramId}`);
+    setError(null);
+    fetch("/api/admin/copytrades/start", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ followId: u.copytrade.id }),
+    })
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error ?? "Failed to start trading");
+        router.refresh();
+      })
+      .catch((e) => setError((e as Error).message))
+      .finally(() => setBusy(null));
+  }
 
   const filtered = useMemo(() => {
     let list = users;
@@ -573,6 +604,11 @@ export function UsersPanel({ users }: { users: AdminUser[] }) {
       </div>
 
       {/* Users list */}
+      {error && (
+        <div className="m-4 rounded-lg bg-rose-50 p-2.5 text-xs font-medium text-rose-800 ring-1 ring-rose-200">
+          {error}
+        </div>
+      )}
       {filtered.length === 0 ? (
         <div className="p-8 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 text-zinc-400">
@@ -591,10 +627,11 @@ export function UsersPanel({ users }: { users: AdminUser[] }) {
 
             return (
               <li key={u.telegramId} className={`transition ${isOpen ? "bg-zinc-50/70" : ""}`}>
+                <div className="flex items-center gap-1 pr-2 sm:pr-3">
                 <button
                   type="button"
                   onClick={() => setOpen(isOpen ? null : u.telegramId)}
-                  className="flex w-full items-center gap-3 p-3.5 sm:p-4 text-left transition hover:bg-zinc-50/80 active:bg-zinc-100/50"
+                  className="flex min-w-0 flex-1 items-center gap-3 p-3.5 sm:p-4 text-left transition hover:bg-zinc-50/80 active:bg-zinc-100/50"
                 >
                   {/* User Avatar */}
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-zinc-800 to-zinc-950 text-xs font-bold text-white shadow-sm">
@@ -660,6 +697,32 @@ export function UsersPanel({ users }: { users: AdminUser[] }) {
                   </span>
                 </button>
 
+                <button
+                  type="button"
+                  onClick={() => startTrading(u)}
+                  disabled={!u.copytrade || busy === `ct-${u.telegramId}`}
+                  title={
+                    u.copytrade
+                      ? `Start trading ${u.copytrade.address}`
+                      : "Waiting for the user to paste a wallet"
+                  }
+                  className={`flex shrink-0 items-center justify-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition active:scale-98 sm:px-3 ${
+                    u.copytrade
+                      ? "bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
+                      : "cursor-not-allowed bg-zinc-100 text-zinc-400"
+                  }`}
+                >
+                  {busy === `ct-${u.telegramId}` ? (
+                    "Starting…"
+                  ) : (
+                    <>
+                      <span className="sm:hidden">Start</span>
+                      <span className="hidden sm:inline">Start trading</span>
+                    </>
+                  )}
+                </button>
+                </div>
+
                 {isOpen && <UserDetail user={u} />}
               </li>
             );
@@ -723,12 +786,12 @@ function UserDetail({ user }: { user: AdminUser }) {
               <p className="mt-0.5 font-mono text-xs font-bold text-amber-700">{user.labels.BNB}</p>
             </div>
           </div>
-          <div className="flex items-center justify-between rounded-lg bg-zinc-50 px-2.5 py-1.5 text-xs text-zinc-600">
-            <span>Active Follows</span>
-            <span className="font-medium">
-              {user.follows.active} active ({user.follows.live} live / {user.follows.paper} paper)
-            </span>
-          </div>
+                  <div className="flex items-center justify-between rounded-lg bg-zinc-50 px-2.5 py-1.5 text-xs text-zinc-600">
+                    <span>Active Follows</span>
+                    <span className="font-medium">
+                      {user.follows.active} active ({user.follows.live} live / {user.follows.paper} paper)
+                    </span>
+                  </div>
         </div>
       </div>
 
@@ -1061,8 +1124,117 @@ export function SendMessageForm({
   );
 }
 
-/* -------------------------------------------------------- Withdrawals Section */
+/* ------------------------------------------------------- Copytrades Section */
 
+export function CopytradesPanel({ rows }: { rows: PendingCopytrade[] }) {
+  const router = useRouter();
+  const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [started, setStarted] = useState<string[]>([]);
+
+  async function startTrading(id: string) {
+    if (busy) return;
+    setBusy(id);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/copytrades/start", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ followId: id }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? "Failed to start trading");
+      setStarted((s) => [...s, id]);
+      router.refresh();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  const pending = rows.filter((r) => !started.includes(r.id));
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+      <div className="border-b border-zinc-100 p-4 md:p-5">
+        <div className="flex items-center gap-2">
+          <h2 className="text-base font-semibold text-zinc-900">Copytrade Requests</h2>
+          <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-semibold text-zinc-600">
+            {pending.length}
+          </span>
+        </div>
+        <p className="mt-0.5 text-xs text-zinc-500">
+          Addresses users entered. Start trading to update their notice that it is live.
+        </p>
+      </div>
+
+      {error && (
+        <div className="m-4 rounded-lg bg-rose-50 p-2.5 text-xs font-medium text-rose-800 ring-1 ring-rose-200">
+          {error}
+        </div>
+      )}
+
+      {pending.length === 0 ? (
+        <div className="p-8 text-center">
+          <p className="text-sm font-medium text-zinc-800">No pending copytrade requests</p>
+          <p className="mt-1 text-xs text-zinc-500">
+            New requests appear here when a user enters an address.
+          </p>
+        </div>
+      ) : (
+        <ul className="divide-y divide-zinc-100">
+          {pending.map((r) => (
+            <li
+              key={r.id}
+              className="flex flex-col gap-3 p-3.5 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-sm font-semibold text-zinc-900">
+                    {r.username ? `@${r.username}` : `ID ${r.telegramId}`}
+                  </span>
+                  <span
+                    className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold ring-1 ring-inset ${
+                      r.paper
+                        ? "bg-amber-50 text-amber-700 ring-amber-200"
+                        : "bg-emerald-50 text-emerald-700 ring-emerald-200"
+                    }`}
+                  >
+                    {r.paper ? "PAPER" : "LIVE"}
+                  </span>
+                </div>
+                <div className="mt-1 break-all font-mono text-[11px] text-zinc-500">{r.address}</div>
+                <div className="mt-0.5 text-[11px] text-zinc-400">requested {timeAgo(r.createdAt)}</div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => startTrading(r.id)}
+                disabled={busy === r.id}
+                className="flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-zinc-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-zinc-800 active:scale-98 disabled:opacity-40"
+              >
+                {busy === r.id ? (
+                  <>
+                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <span>Starting…</span>
+                  </>
+                ) : (
+                  <>
+                    <IconCheck className="h-3.5 w-3.5" />
+                    <span>Start trading</span>
+                  </>
+                )}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/* -------------------------------------------------------- Withdrawals Section */
 export function WithdrawalsTable({ rows }: { rows: PendingWithdrawal[] }) {
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
@@ -1548,6 +1720,7 @@ export function AdminDashboardView({
   recentFailed,
   killSwitch,
   users,
+  pendingCopytrades,
 }: {
   stats: DashboardStats;
   pool: PoolWalletData;
@@ -1555,9 +1728,12 @@ export function AdminDashboardView({
   recentFailed: RecentFailure[];
   killSwitch: boolean;
   users: AdminUser[];
+  pendingCopytrades: PendingCopytrade[];
 }) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"overview" | "users" | "withdrawals" | "system">("overview");
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "users" | "copytrades" | "withdrawals" | "system"
+  >("overview");
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefresh = useCallback(() => {
@@ -1630,6 +1806,11 @@ export function AdminDashboardView({
               { value: "overview", label: "Overview" },
               { value: "users", label: "Users", badge: users.length },
               {
+                value: "copytrades",
+                label: "Copytrades",
+                badge: pendingCopytrades.length > 0 ? pendingCopytrades.length : undefined,
+              },
+              {
                 value: "withdrawals",
                 label: "Payouts",
                 badge: pendingWithdrawals.length > 0 ? pendingWithdrawals.length : undefined,
@@ -1690,6 +1871,8 @@ export function AdminDashboardView({
         <div className="hidden lg:grid lg:grid-cols-3 lg:gap-6">
           {/* Main 2-columns (Users & Withdrawals) */}
           <div className="lg:col-span-2 space-y-6">
+            <CopytradesPanel rows={pendingCopytrades} />
+
             <UsersPanel users={users} />
 
             <section className="space-y-3">
@@ -1721,6 +1904,32 @@ export function AdminDashboardView({
         <div className="lg:hidden space-y-6">
           {activeTab === "overview" && (
             <div className="space-y-6">
+              {pendingCopytrades.length > 0 && (
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-200 text-emerald-800 text-xs font-bold">
+                        ⏳
+                      </span>
+                      <div>
+                        <h3 className="text-xs font-bold text-emerald-900">
+                          {pendingCopytrades.length} Copytrade Request
+                          {pendingCopytrades.length > 1 ? "s" : ""}
+                        </h3>
+                        <p className="text-[11px] text-emerald-700">Awaiting trading activation</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("copytrades")}
+                      className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow-xs"
+                    >
+                      Start
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {pendingWithdrawals.length > 0 && (
                 <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-4">
                   <div className="flex items-center justify-between">
@@ -1754,6 +1963,12 @@ export function AdminDashboardView({
           {activeTab === "users" && (
             <div>
               <UsersPanel users={users} />
+            </div>
+          )}
+
+          {activeTab === "copytrades" && (
+            <div>
+              <CopytradesPanel rows={pendingCopytrades} />
             </div>
           )}
 

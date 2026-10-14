@@ -97,6 +97,8 @@ model Follow {
   copyBuys     Boolean         @default(true)
   copySells    Boolean         @default(true)
   strictSafety Boolean         @default(true) // require renounced mint/freeze authority
+  startedAt    DateTime? // null = awaiting operator to start trading; set = operator-confirmed live
+  statusMessageId BigInt? // Telegram message id of the "in progress" notice, edited once trading starts
   createdAt    DateTime        @default(now())
   orders       CopyOrder[]
   paperPositions PaperPosition[]

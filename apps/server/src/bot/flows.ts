@@ -252,7 +252,10 @@ bot.on("message:text", async (ctx, next) => {
     const sent = await ctx.reply(processingText, { parse_mode: "HTML" });
     await ctx.api.editMessageText(sent.chat.id, sent.message_id, followText({ trader }), {
       parse_mode: "HTML",
-      reply_markup: followKeyboard(f),
+    });
+    await db.follow.update({
+      where: { id: f.id },
+      data: { statusMessageId: BigInt(sent.message_id) },
     });
     return;
   }

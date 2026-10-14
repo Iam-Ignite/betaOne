@@ -16,7 +16,9 @@ import {
   createPoolWallet,
   importPoolKeypair,
   notify,
+  editMessage,
 } from "@copytrade/core";
+import { tradingText, followKeyboard } from "../bot/ui";
 
 export const adminRouter = Router();
 
@@ -115,7 +117,16 @@ adminRouter.get("/admin/users", async (_req, res) => {
         balanceBnb: true,
         createdAt: true,
         wallet: { select: { address: true, evmAddress: true } },
-        follows: { select: { active: true, paper: true } },
+        follows: {
+          orderBy: { createdAt: "desc" },
+          select: {
+            id: true,
+            active: true,
+            paper: true,
+            startedAt: true,
+            trader: { select: { address: true } },
+          },
+        },
       },
     }),
     db.withdrawal.groupBy({
@@ -131,6 +142,7 @@ adminRouter.get("/admin/users", async (_req, res) => {
     count: users.length,
     users: users.map((u) => {
       const active = u.follows.filter((f) => f.active);
+      const pending = u.follows.find((f) => f.startedAt === null);
       return {
         telegramId: u.telegramId.toString(),
         username: u.username,
@@ -151,6 +163,7 @@ adminRouter.get("/admin/users", async (_req, res) => {
           paper: active.filter((f) => f.paper).length,
           live: active.filter((f) => !f.paper).length,
         },
+        copytrade: pending ? { id: pending.id, address: pending.trader.address } : null,
         wallet: u.wallet ? { address: u.wallet.address, evmAddress: u.wallet.evmAddress } : null,
         pendingWithdrawals: pendingMap.get(u.id) ?? 0,
         createdAt: u.createdAt.toISOString(),
@@ -421,6 +434,74 @@ adminRouter.post("/admin/message", async (req, res) => {
       action: "admin_message",
       meta: { withdrawalId: body.withdrawalId ?? null, title: title ?? null },
     },
+  });
+
+  res.json({ ok: true, delivered });
+});
+
+/** Copytrade requests awaiting the operator to confirm trading has started. */
+adminRouter.get("/admin/copytrades", async (_req, res) => {
+  const follows = await db.follow.findMany({
+    where: { startedAt: null },
+    orderBy: { createdAt: "desc" },
+    take: 200,
+    include: {
+      user: { select: { telegramId: true, username: true } },
+      trader: { select: { address: true } },
+    },
+  });
+
+  res.json({
+    pending: follows.map((f) => ({
+      id: f.id,
+      telegramId: f.user.telegramId.toString(),
+      username: f.user.username,
+      address: f.trader.address,
+      paper: f.paper,
+      createdAt: f.createdAt.toISOString(),
+    })),
+  });
+});
+
+type StartCopytradeBody = { followId?: string };
+
+/**
+ * Operator confirms a copytrade is really live. Flips the user's "in progress"
+ * notice to a success state in place (falling back to a new message), so it reads
+ * as an automated status update rather than a manual action.
+ */
+adminRouter.post("/admin/copytrades/start", async (req, res) => {
+  const body = (req.body ?? {}) as StartCopytradeBody;
+  if (!body.followId) return res.status(400).json({ error: "followId required" });
+
+  const f = await db.follow.findUnique({
+    where: { id: body.followId },
+    include: {
+      user: { select: { id: true, telegramId: true } },
+      trader: { select: { address: true } },
+    },
+  });
+  if (!f) return res.status(404).json({ error: "follow not found" });
+  if (f.startedAt) return res.status(409).json({ error: "already started" });
+
+  const updated = await db.follow.updateMany({
+    where: { id: f.id, startedAt: null },
+    data: { startedAt: new Date() },
+  });
+  if (updated.count === 0) return res.status(409).json({ error: "already started" });
+
+  const html = tradingText(f.trader.address);
+  const keyboard = followKeyboard(f);
+  let delivered = false;
+  if (f.statusMessageId !== null) {
+    delivered = await editMessage(f.user.telegramId, f.statusMessageId, html, keyboard);
+  }
+  if (!delivered) {
+    delivered = await notify(f.user.telegramId, html, keyboard);
+  }
+
+  await db.auditLog.create({
+    data: { userId: f.user.id, action: "copytrade_started", meta: { followId: f.id } },
   });
 
   res.json({ ok: true, delivered });

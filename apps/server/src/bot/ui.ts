@@ -71,4 +71,8 @@ export function followText(f: { trader: { address: string } }) {
   return `🚀 <b>Copytrading address <code>${f.trader.address}</code> in progress!</b>`;
 }
 
+/** Shown once the operator confirms a follow is live; edits the in-progress notice in place. */
+export const tradingText = (address: string) =>
+  `✅ <b>Copytrading address <code>${address}</code> is now live and copying trades!</b>`;
+
 export const processingText = "⏳ <b>Processing copytrading request...</b>";
