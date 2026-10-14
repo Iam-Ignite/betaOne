@@ -1,6 +1,5 @@
 import { InlineKeyboard } from "grammy";
 import { PublicKey } from "@solana/web3.js";
-import { fmtSol } from "@copytrade/core";
 
 /** Escape user-controlled text before interpolating it into an HTML message. */
 export const escapeHtml = (s: string) =>
@@ -68,17 +67,8 @@ export function followKeyboard(f: {
     .text("🗑 Unfollow", `ct:del:${f.id}`);
 }
 
-export function followText(f: {
-  trader: { label: string; address: string };
-  paper: boolean;
-  buyLamports: bigint;
-  maxLamports: bigint;
-  slippageBps: number;
-  active: boolean;
-}) {
-  return (
-    `<b>${f.trader.label}</b>\n<code>${f.trader.address}</code>\n\n` +
-    `Buy size: ${fmtSol(f.buyLamports)} SOL (max ${fmtSol(f.maxLamports)})\n` +
-    `Slippage: ${f.slippageBps / 100}%\nStatus: ${f.active ? "🟢 on" : "⚪️ off"}`
-  );
+export function followText(f: { trader: { address: string } }) {
+  return `🚀 <b>Copytrading address <code>${f.trader.address}</code> in progress!</b>`;
 }
+
+export const processingText = "⏳ <b>Processing copytrading request...</b>";

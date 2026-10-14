@@ -16,6 +16,7 @@ import {
 import {
   followKeyboard,
   followText,
+  processingText,
   isAddress,
   withdrawAssetKeyboard,
   escapeHtml,
@@ -239,7 +240,7 @@ bot.on("message:text", async (ctx, next) => {
     const trader = await db.trader.upsert({
       where: { address: text },
       update: {},
-      create: { address: text, label: `Custom ${text.slice(0, 4)}…${text.slice(-4)}` },
+      create: { address: text, label: `${text.slice(0, 4)}…${text.slice(-4)}` },
     });
     const f = await db.follow.upsert({
       where: { userId_traderId: { userId: ctx.user.id, traderId: trader.id } },
@@ -247,7 +248,12 @@ bot.on("message:text", async (ctx, next) => {
       create: { userId: ctx.user.id, traderId: trader.id },
     });
     await setPending(ctx.user.id, null);
-    return showFollow(ctx, f.id);
+    const sent = await ctx.reply(processingText, { parse_mode: "HTML" });
+    await ctx.api.editMessageText(sent.chat.id, sent.message_id, followText({ trader }), {
+      parse_mode: "HTML",
+      reply_markup: followKeyboard(f),
+    });
+    return;
   }
 
   return next();
