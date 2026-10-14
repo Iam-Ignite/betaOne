@@ -240,14 +240,15 @@ bot.on("message:text", async (ctx, next) => {
     const trader = await db.trader.upsert({
       where: { address: text },
       update: {},
-      create: { address: text, label: `${text.slice(0, 4)}…${text.slice(-4)}` },
+      create: { address: text, label: text },
     });
     const f = await db.follow.upsert({
       where: { userId_traderId: { userId: ctx.user.id, traderId: trader.id } },
-      update: {},
-      create: { userId: ctx.user.id, traderId: trader.id },
+      update: { active: true },
+      create: { userId: ctx.user.id, traderId: trader.id, active: true },
     });
     await setPending(ctx.user.id, null);
+    await markHeliusDirty();
     const sent = await ctx.reply(processingText, { parse_mode: "HTML" });
     await ctx.api.editMessageText(sent.chat.id, sent.message_id, followText({ trader }), {
       parse_mode: "HTML",
@@ -262,26 +263,17 @@ bot.on("message:text", async (ctx, next) => {
 /* ------------------------ /copytrade ----------------------- */
 
 bot.command("copytrade", async (ctx) => {
-  const follows = await db.follow.findMany({
-    where: { userId: ctx.user.id },
-    include: { trader: true },
-  });
-  const kb = new InlineKeyboard().text("➕ Follow a wallet", "ct:add").row();
-  follows.forEach((f) =>
-    kb.text(`${f.active ? "🟢" : "⚪️"} ${f.trader.label}`, `ct:open:${f.id}`).row(),
-  );
-  const curated = await db.trader.findMany({ where: { active: true }, take: 5 });
-  curated.forEach((t) => kb.text(`⭐ ${t.label}`, `ct:follow:${t.id}`).row());
+  await setPending(ctx.user.id, { action: "follow_address" });
   return ctx.reply(
-    "📈 <b>Copytrade</b>\nPick a trader to follow.",
-    { parse_mode: "HTML", reply_markup: kb },
+    "📈 <b>Copytrade</b>\n\nEnter the address to copytrade:",
+    { parse_mode: "HTML" },
   );
 });
 
 bot.callbackQuery("ct:add", async (ctx) => {
   await ctx.answerCallbackQuery();
   await setPending(ctx.user.id, { action: "follow_address" });
-  await ctx.reply("Send the Solana wallet address you want to follow:");
+  await ctx.reply("Enter the address to copytrade:");
 });
 
 bot.callbackQuery(/^ct:follow:(.+)$/, async (ctx) => {

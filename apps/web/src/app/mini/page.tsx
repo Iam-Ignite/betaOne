@@ -64,7 +64,6 @@ export default function Mini() {
             <div className="font-semibold">
               {f.active ? "🟢" : "⚪️"} {f.trader}
             </div>
-            <div className="break-all text-xs text-zinc-500">{f.address}</div>
             <div className="text-sm">
               Buy: {(Number(f.buyLamports) / 1e9).toFixed(3)} SOL · Slippage: {f.slippageBps / 100}%
             </div>
