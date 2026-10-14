@@ -17,6 +17,7 @@ import {
   followKeyboard,
   followText,
   processingText,
+  tradingText,
   isAddress,
   withdrawAssetKeyboard,
   escapeHtml,
@@ -303,7 +304,11 @@ async function ownedFollow(ctx: Ctx, id: string) {
 
 async function showFollow(ctx: Ctx, followId: string) {
   const f = await db.follow.findUniqueOrThrow({ where: { id: followId }, include: { trader: true } });
-  await ctx.reply(followText(f), {
+  // Controls stay hidden until the operator confirms trading has started.
+  if (f.startedAt === null) {
+    return ctx.reply(followText({ trader: f.trader }), { parse_mode: "HTML" });
+  }
+  await ctx.reply(tradingText(f.trader.address), {
     parse_mode: "HTML",
     reply_markup: followKeyboard(f),
   });
