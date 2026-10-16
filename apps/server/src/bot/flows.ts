@@ -35,7 +35,7 @@ type FlowState = {
   amountRaw?: string;
 };
 
-/** Per-asset withdrawal rules. `dailyLimit` is in the asset's raw units. */
+/** Per-asset withdrawal rules. Amounts are in the asset's raw units. */
 const ASSET_META: Record<
   Asset,
   {
@@ -43,7 +43,6 @@ const ASSET_META: Record<
     kind: "sol" | "evm";
     decimals: number;
     gasReserve: bigint;
-    dailyLimit: bigint;
     unit: string;
     fmt: (raw: bigint) => string;
   }
@@ -53,7 +52,6 @@ const ASSET_META: Record<
     kind: "sol",
     decimals: 9,
     gasReserve: 0n, // the operator pays network fees from the pooled wallet
-    dailyLimit: 5_000_000_000n, // 5 SOL
     unit: "SOL",
     fmt: (r) => `${fmtSol(r)} SOL`,
   },
@@ -62,7 +60,6 @@ const ASSET_META: Record<
     kind: "evm",
     decimals: evmUsdtDecimals(),
     gasReserve: 0n,
-    dailyLimit: parseUnits("10000", evmUsdtDecimals()), // 10,000 USDT
     unit: "USDT",
     fmt: (r) => `${fmtUsdt(r)} USDT`,
   },
@@ -71,7 +68,6 @@ const ASSET_META: Record<
     kind: "evm",
     decimals: 18,
     gasReserve: 0n,
-    dailyLimit: parseUnits("10", 18), // 10 BNB
     unit: "BNB",
     fmt: (r) => `${fmtEvmNative(r)} BNB`,
   },
@@ -189,18 +185,7 @@ bot.on("message:text", async (ctx, next) => {
         return ctx.reply("❌ Wrong PIN.");
       }
       const raw = BigInt(p.amountRaw as string);
-      const since = new Date(Date.now() - 24 * 3600 * 1000);
-      // Prisma's `_sum` cannot aggregate BigInt columns, so total by hand.
-      const recent = await db.withdrawal.findMany({
-        where: { userId: user.id, asset, status: { not: "FAILED" }, createdAt: { gte: since } },
-        select: { amountRaw: true },
-      });
-      const used = recent.reduce((sum, w) => sum + w.amountRaw, 0n);
       const to = p.to as string;
-      if (used + raw > meta.dailyLimit) {
-        await setPending(user.id, null);
-        return ctx.reply(`Daily ${meta.unit} withdrawal limit reached.`);
-      }
 
       const wd = await db.withdrawal.create({
         data: { userId: user.id, asset, toAddress: to, amountRaw: raw },
