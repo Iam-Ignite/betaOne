@@ -1,7 +1,8 @@
-import { bot, registerWebhook } from "../src/bot/index";
+import { bot, registerWebhook, syncBotProfile } from "../src/bot/index";
 
 async function main() {
   await bot.init();
+  await syncBotProfile();
   const url = await registerWebhook();
   if (!url) {
     throw new Error(
