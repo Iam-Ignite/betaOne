@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { startLoops } from "./worker/loops";
-import { initBot } from "./bot";
+import { initBot, ensureWebhook } from "./bot";
 import { telegramWebhook } from "./routes/telegram";
 import { heliusRouter } from "./routes/helius";
 import { miniRouter } from "./routes/mini";
@@ -44,6 +44,17 @@ app.listen(port, () => console.log(`server listening on :${port}`));
 // Register the Telegram webhook on boot (idempotent) so we don't depend on a
 // manual `set-webhook` run after each deploy. Failures are logged, not fatal.
 initBot().catch((e) => console.error("[bot] init failed", e));
+
+// Watchdog: re-assert the webhook if Telegram's copy is missing or stale. A
+// lost registration once silenced the bot until a redeploy; this self-heals
+// within one interval. Set WEBHOOK_WATCH_MS=0 to disable.
+const webhookWatchMs = Number(process.env.WEBHOOK_WATCH_MS ?? 5 * 60 * 1000);
+if (webhookWatchMs > 0) {
+  setInterval(() => {
+    ensureWebhook().catch((e) => console.error("[bot] webhook watch failed", e));
+  }, webhookWatchMs);
+  console.log(`webhook watchdog every ${webhookWatchMs / 1000}s`);
+}
 
 startLoops();
 

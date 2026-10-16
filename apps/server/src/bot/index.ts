@@ -60,19 +60,70 @@ export async function registerWebhook(): Promise<string | null> {
   return url;
 }
 
+/** Retry a boot-time Telegram call — a single transient failure must not leave
+ * the bot deaf (no webhook) until the next manual restart. */
+async function retry(label: string, fn: () => Promise<unknown>, attempts = 4): Promise<void> {
+  for (let i = 1; i <= attempts; i++) {
+    try {
+      await fn();
+      return;
+    } catch (e) {
+      console.error(`[bot] ${label} failed (attempt ${i}/${attempts})`, e);
+      if (i < attempts) await new Promise((r) => setTimeout(r, i * 3_000));
+    }
+  }
+  console.error(`[bot] ${label} gave up after ${attempts} attempts`);
+}
+
+function expectedWebhookUrl(): string | null {
+  const base = process.env.PUBLIC_BASE_URL;
+  if (!base || isLocalHostname(base)) return null;
+  return `${base.replace(/\/+$/, "")}/telegram`;
+}
+
+/** Warn at most once — the watchdog interval re-runs this check continuously. */
+let missingBaseWarned = false;
+
 /**
- * Load the bot identity, sync the profile, and (re)register the webhook. Called
- * on server boot so deployments don't depend on someone remembering to run the
- * set-webhook script. Never throws: the server should still come up (and serve
- * /health) if Telegram is briefly unreachable.
+ * Idempotent self-healing check: if Telegram isn't pointing at our webhook (or
+ * pointed at a stale one), fix it. Called on boot and on an interval so a
+ * cleared/failed registration can't silently mute the bot until the next deploy.
+ */
+export async function ensureWebhook(): Promise<void> {
+  const expected = expectedWebhookUrl();
+  if (!expected) {
+    if (!missingBaseWarned) {
+      missingBaseWarned = true;
+      console.warn("[bot] PUBLIC_BASE_URL missing or local — cannot register webhook");
+    }
+    return;
+  }
+  try {
+    const info = await bot.api.getWebhookInfo();
+    if (info.url === expected && !info.last_error_message) return;
+    console.warn(
+      `[bot] webhook mismatch — have "${info.url}", want "${expected}"` +
+        (info.last_error_message ? ` (last error: ${info.last_error_message})` : ""),
+    );
+    const url = await registerWebhook();
+    if (url) {
+      console.log(`[bot] webhook re-registered at ${url} (${info.pending_update_count} queued)`);
+      await retry("syncBotProfile", syncBotProfile, 2);
+    }
+  } catch (e) {
+    console.error("[bot] webhook check failed", e);
+  }
+}
+
+/**
+ * Load the bot identity and (re)register the webhook. Profile sync is
+ * deliberately last and independent: a setMyCommands/setMyDescription failure
+ * must never prevent webhook registration, or the bot goes silent entirely.
+ * Never throws — the server should still come up (and serve /health) if
+ * Telegram is briefly unreachable.
  */
 export async function initBot(): Promise<void> {
-  await bot.init();
-  try {
-    await syncBotProfile();
-    const url = await registerWebhook();
-    if (url) console.log(`[bot] webhook registered at ${url}`);
-  } catch (e) {
-    console.error("[bot] bot setup failed", e);
-  }
+  await retry("bot.init", () => bot.init(), 3);
+  await ensureWebhook();
+  await retry("syncBotProfile", syncBotProfile, 2);
 }
