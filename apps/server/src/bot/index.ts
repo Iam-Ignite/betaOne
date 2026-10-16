@@ -1,5 +1,6 @@
 import "./commands";
 import "./flows";
+import { lookup } from "node:dns/promises";
 import { bot } from "./instance";
 import { COMMANDS } from "./commands";
 
@@ -22,6 +23,18 @@ function isLocalHostname(url: string): boolean {
     return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "0.0.0.0";
   } catch {
     return true;
+  }
+}
+
+let unresolvableWarnedFor: string | null = null;
+
+async function isResolvableHostname(url: string): Promise<boolean> {
+  try {
+    const { hostname } = new URL(url);
+    await lookup(hostname);
+    return true;
+  } catch {
+    return false;
   }
 }
 
@@ -50,6 +63,15 @@ export async function registerWebhook(): Promise<string | null> {
     console.warn(
       `[bot] PUBLIC_BASE_URL is local (${base}) — Telegram can't reach it, skipping webhook registration`,
     );
+    return null;
+  }
+  if (!(await isResolvableHostname(base))) {
+    if (unresolvableWarnedFor !== base) {
+      unresolvableWarnedFor = base;
+      console.warn(
+        `[bot] PUBLIC_BASE_URL host does not resolve (${base}) — skipping webhook registration`,
+      );
+    }
     return null;
   }
   const url = `${base.replace(/\/+$/, "")}/telegram`;
