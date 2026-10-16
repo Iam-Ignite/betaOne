@@ -8,14 +8,180 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-enum UserStatus {
-  ACTIVE
-  FROZEN
+model AuditLog {
+  id        String   @id
+  userId    String?
+  action    String
+  meta      Json?
+  createdAt DateTime @default(now())
 }
 
-enum Side {
-  BUY
-  SELL
+model CopyOrder {
+  id              String      @id
+  followId        String
+  swapId          String
+  leaderSignature String
+  side            Side
+  tokenMint       String
+  paper           Boolean
+  status          OrderStatus @default(PENDING)
+  inAmountRaw     String?
+  outAmountRaw    String?
+  requestId       String?
+  txSignature     String?
+  skipReason      String?
+  error           String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime
+  Follow          Follow      @relation(fields: [followId], references: [id])
+  LeaderSwap      LeaderSwap  @relation(fields: [swapId], references: [id])
+
+  @@unique([followId, leaderSignature])
+  @@index([status, createdAt])
+}
+
+model Follow {
+  id              String          @id
+  userId          String
+  traderId        String
+  active          Boolean         @default(false)
+  paper           Boolean         @default(false)
+  buyLamports     BigInt          @default(50000000)
+  maxLamports     BigInt          @default(100000000)
+  slippageBps     Int             @default(1000)
+  copyBuys        Boolean         @default(true)
+  copySells       Boolean         @default(true)
+  strictSafety    Boolean         @default(true)
+  createdAt       DateTime        @default(now())
+  startedAt       DateTime?
+  statusMessageId BigInt?
+  CopyOrder       CopyOrder[]
+  Trader          Trader          @relation(fields: [traderId], references: [id])
+  User            User            @relation(fields: [userId], references: [id])
+  LivePosition    LivePosition[]
+  PaperPosition   PaperPosition[]
+
+  @@unique([userId, traderId])
+}
+
+model LeaderSwap {
+  id         String      @id
+  signature  String      @unique
+  traderId   String
+  side       Side
+  tokenMint  String
+  inputMint  String
+  outputMint String
+  inAmount   String
+  outAmount  String
+  blockTime  DateTime
+  createdAt  DateTime    @default(now())
+  CopyOrder  CopyOrder[]
+  Trader     Trader      @relation(fields: [traderId], references: [id])
+}
+
+model LedgerEntry {
+  id           String        @id
+  userId       String
+  asset        WithdrawAsset
+  deltaRaw     BigInt
+  balanceAfter BigInt
+  reason       String
+  refId        String?
+  createdAt    DateTime      @default(now())
+  User         User          @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+}
+
+model LivePosition {
+  id           String   @id
+  followId     String
+  tokenMint    String
+  amountRaw    String
+  costLamports BigInt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime
+  Follow       Follow   @relation(fields: [followId], references: [id])
+
+  @@unique([followId, tokenMint])
+  @@index([followId])
+}
+
+model PaperPosition {
+  id           String @id
+  followId     String
+  tokenMint    String
+  amountRaw    String
+  costLamports BigInt
+  Follow       Follow @relation(fields: [followId], references: [id])
+
+  @@unique([followId, tokenMint])
+}
+
+model Setting {
+  key   String @id
+  value String
+}
+
+model Trader {
+  id         String       @id
+  address    String       @unique
+  label      String
+  active     Boolean      @default(true)
+  createdAt  DateTime     @default(now())
+  Follow     Follow[]
+  LeaderSwap LeaderSwap[]
+}
+
+model User {
+  id          String        @id
+  telegramId  BigInt        @unique
+  username    String?
+  status      UserStatus    @default(ACTIVE)
+  pinHash     String?
+  pending     Json?
+  createdAt   DateTime      @default(now())
+  balanceBnb  BigInt        @default(0)
+  balanceSol  BigInt        @default(0)
+  balanceUsdt BigInt        @default(0)
+  Follow      Follow[]
+  LedgerEntry LedgerEntry[]
+  Wallet      Wallet?
+  Withdrawal  Withdrawal[]
+}
+
+model Wallet {
+  id                 String   @id
+  userId             String   @unique
+  address            String   @unique
+  encrypted          Json
+  lastKnownLamports  BigInt   @default(0)
+  createdAt          DateTime @default(now())
+  evmAddress         String?  @unique
+  evmEncrypted       Json?
+  lastKnownUsdt      BigInt   @default(0)
+  lastKnownEvmNative BigInt   @default(0)
+  User               User     @relation(fields: [userId], references: [id])
+}
+
+model Withdrawal {
+  id          String           @id
+  userId      String
+  toAddress   String
+  status      WithdrawalStatus @default(PENDING)
+  txSignature String?
+  error       String?
+  createdAt   DateTime         @default(now())
+  amountRaw   BigInt
+  asset       WithdrawAsset    @default(SOL)
+  approvedAt  DateTime?
+  approvedBy  String?
+  note        String?
+  User        User             @relation(fields: [userId], references: [id])
+
+  @@index([status, createdAt])
+  @@index([userId, asset, createdAt])
 }
 
 enum OrderStatus {
@@ -27,12 +193,14 @@ enum OrderStatus {
   FAILED
 }
 
-enum WithdrawalStatus {
-  PENDING
-  PROCESSING
-  SUBMITTED
-  CONFIRMED
-  FAILED
+enum Side {
+  BUY
+  SELL
+}
+
+enum UserStatus {
+  ACTIVE
+  FROZEN
 }
 
 enum WithdrawAsset {
@@ -41,183 +209,10 @@ enum WithdrawAsset {
   BNB
 }
 
-model User {
-  id          String        @id @default(cuid())
-  telegramId  BigInt        @unique
-  username    String?
-  status      UserStatus    @default(ACTIVE)
-  pinHash     String?
-  pending     Json? // multi-step flow state: { action, step, data }
-  // Internal (pooled) ledger balances, in each asset's raw units.
-  balanceSol  BigInt        @default(0) // lamports
-  balanceUsdt BigInt        @default(0) // BEP-20 USDT raw units
-  balanceBnb  BigInt        @default(0) // wei
-  createdAt   DateTime      @default(now())
-  wallet      Wallet?
-  follows     Follow[]
-  withdrawals Withdrawal[]
-  ledger      LedgerEntry[]
-}
-
-model Wallet {
-  id                String   @id @default(cuid())
-  userId            String   @unique
-  user              User     @relation(fields: [userId], references: [id])
-  address           String   @unique // Solana address (base58)
-  encrypted         Json // envelope-encrypted Solana secret key (see crypto.ts)
-  evmAddress        String?  @unique // EVM address (0x...), used for USDT deposits
-  evmEncrypted      Json? // envelope-encrypted EVM private key
-  lastKnownLamports BigInt   @default(0) // for deposit notifications
-  lastKnownUsdt     BigInt   @default(0) // raw USDT units, for deposit notifications
-  lastKnownEvmNative BigInt  @default(0) // raw native (BNB) units, for gas-topup notifications
-  createdAt         DateTime @default(now())
-}
-
-model Trader {
-  id        String       @id @default(cuid())
-  address   String       @unique
-  label     String
-  active    Boolean      @default(true)
-  createdAt DateTime     @default(now())
-  follows   Follow[]
-  swaps     LeaderSwap[]
-}
-
-model Follow {
-  id           String          @id @default(cuid())
-  userId       String
-  traderId     String
-  user         User            @relation(fields: [userId], references: [id])
-  trader       Trader          @relation(fields: [traderId], references: [id])
-  active       Boolean         @default(false)
-  paper        Boolean         @default(false) // live mode by default
-  buyLamports  BigInt          @default(50000000) // 0.05 SOL per copied buy
-  maxLamports  BigInt          @default(100000000) // hard cap per trade
-  slippageBps  Int             @default(1000)
-  copyBuys     Boolean         @default(true)
-  copySells    Boolean         @default(true)
-  strictSafety Boolean         @default(true) // require renounced mint/freeze authority
-  startedAt    DateTime? // null = awaiting operator to start trading; set = operator-confirmed live
-  statusMessageId BigInt? // Telegram message id of the "in progress" notice, edited once trading starts
-  createdAt    DateTime        @default(now())
-  orders       CopyOrder[]
-  paperPositions PaperPosition[]
-  livePositions LivePosition[]
-
-  @@unique([userId, traderId])
-}
-
-model LeaderSwap {
-  id         String       @id @default(cuid())
-  signature  String       @unique // idempotency: webhooks can be delivered more than once
-  traderId   String
-  trader     Trader       @relation(fields: [traderId], references: [id])
-  side       Side
-  tokenMint  String
-  inputMint  String
-  outputMint String
-  inAmount   String // raw units as string (BigInt-safe)
-  outAmount  String
-  blockTime  DateTime
-  createdAt  DateTime     @default(now())
-  orders     CopyOrder[]
-}
-
-model CopyOrder {
-  id              String      @id @default(cuid())
-  followId        String
-  follow          Follow      @relation(fields: [followId], references: [id])
-  swapId          String
-  swap            LeaderSwap  @relation(fields: [swapId], references: [id])
-  leaderSignature String
-  side            Side
-  tokenMint       String
-  paper           Boolean
-  status          OrderStatus @default(PENDING)
-  inAmountRaw     String?
-  outAmountRaw    String?
-  requestId       String? // Jupiter requestId
-  txSignature     String?
-  skipReason      String?
-  error           String?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-
-  @@unique([followId, leaderSignature]) // one order per follower per leader trade
-  @@index([status, createdAt])
-}
-
-model PaperPosition {
-  id           String @id @default(cuid())
-  followId     String
-  follow       Follow @relation(fields: [followId], references: [id])
-  tokenMint    String
-  amountRaw    String
-  costLamports BigInt
-
-  @@unique([followId, tokenMint])
-}
-
-/// A real (live) token position held by the pool on a user's behalf. The tokens
-/// themselves sit commingled in the pool wallet; this is the per-user accounting.
-model LivePosition {
-  id           String @id @default(cuid())
-  followId     String
-  follow       Follow @relation(fields: [followId], references: [id])
-  tokenMint    String
-  amountRaw    String
-  costLamports BigInt
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  @@unique([followId, tokenMint])
-  @@index([followId])
-}
-
-model Withdrawal {
-  id          String           @id @default(cuid())
-  userId      String
-  user        User             @relation(fields: [userId], references: [id])
-  asset       WithdrawAsset    @default(SOL) // SOL (Solana) | USDT (BEP-20) | BNB (BEP-20 native gas)
-  toAddress   String
-  amountRaw   BigInt // lamports for SOL, token raw units for USDT, wei for BNB
-  status      WithdrawalStatus @default(PENDING) // PENDING until an admin marks it paid or rejects it
-  txSignature String? // payout tx hash entered by the admin from the operator wallet
-  error       String?
-  approvedBy  String? // admin username who actioned the request
-  approvedAt  DateTime?
-  note        String?
-  createdAt   DateTime         @default(now())
-
-  @@index([status, createdAt])
-  @@index([userId, asset, createdAt])
-}
-
-/// Append-only record of every balance change. Balances on User are the running
-/// total; this table is the audit trail.
-model LedgerEntry {
-  id           String        @id @default(cuid())
-  userId       String
-  user         User          @relation(fields: [userId], references: [id])
-  asset        WithdrawAsset
-  deltaRaw     BigInt // positive = credit, negative = debit
-  balanceAfter BigInt
-  reason       String // deposit | withdraw_request | withdraw_refund | withdraw_paid | admin_adjust | sweep
-  refId        String?
-  createdAt    DateTime      @default(now())
-
-  @@index([userId, createdAt])
-}
-
-model Setting {
-  key   String @id
-  value String
-}
-
-model AuditLog {
-  id        String   @id @default(cuid())
-  userId    String?
-  action    String
-  meta      Json?
-  createdAt DateTime @default(now())
+enum WithdrawalStatus {
+  PENDING
+  PROCESSING
+  SUBMITTED
+  CONFIRMED
+  FAILED
 }

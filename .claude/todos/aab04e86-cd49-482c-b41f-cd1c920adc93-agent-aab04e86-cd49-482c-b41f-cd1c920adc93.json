@@ -1,8 +1,0 @@
-[
-  {
-    "content": "Fix BookingList component to handle undefined bookings.bookings safely",
-    "status": "completed",
-    "priority": "high",
-    "id": "1"
-  }
-]
