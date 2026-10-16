@@ -1,5 +1,6 @@
 import { Bot, type Context } from "grammy";
-import { db, type User, type Wallet } from "@copytrade/core";
+import { db, notifyAdmin, type User, type Wallet } from "@copytrade/core";
+import { escapeHtml } from "./ui";
 
 export type Ctx = Context & { user: User & { wallet: Wallet | null } };
 
@@ -40,4 +41,18 @@ bot.use(async (ctx, next) => {
   }
   ctx.user = user;
   await next();
+});
+
+// Surface handler crashes instead of letting them 500 the webhook silently —
+// otherwise Telegram just retries and the user sees no reply at all. Also alerts
+// the admin chat when TELEGRAM_ADMIN_CHAT_ID is configured.
+bot.catch((err) => {
+  const { ctx } = err;
+  const cause =
+    err.error instanceof Error ? (err.error.stack ?? err.error.message) : String(err.error);
+  console.error(`[bot] error handling update ${ctx.update.update_id}:`, err.error);
+  const who = ctx.from ? `user ${ctx.from.id}` : "an unknown user";
+  notifyAdmin(`⚠️ <b>Bot error</b> for ${who}\n<pre>${escapeHtml(cause).slice(0, 800)}</pre>`);
+  // Best-effort reply so the user isn't left staring at nothing.
+  ctx.reply("⚠️ Something went wrong. Please try again.").catch(() => {});
 });

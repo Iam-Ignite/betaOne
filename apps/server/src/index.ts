@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { startLoops } from "./worker/loops";
+import { initBot } from "./bot";
 import { telegramWebhook } from "./routes/telegram";
 import { heliusRouter } from "./routes/helius";
 import { miniRouter } from "./routes/mini";
@@ -39,6 +40,10 @@ app.use(adminRouter);
 
 const port = Number(process.env.PORT ?? 3001);
 app.listen(port, () => console.log(`server listening on :${port}`));
+
+// Register the Telegram webhook on boot (idempotent) so we don't depend on a
+// manual `set-webhook` run after each deploy. Failures are logged, not fatal.
+initBot().catch((e) => console.error("[bot] init failed", e));
 
 startLoops();
 
