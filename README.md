@@ -7,3 +7,4 @@ P.R.I.M.E copy-trading Telegram bot — pnpm monorepo:
 - `packages/core` — shared trading, ledger, wallet and DB logic.
 
 See `.env.example` (root, local dev) and the per-app `.env.example` files for configuration.
+# betaOne
