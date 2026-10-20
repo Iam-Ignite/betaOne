@@ -1,0 +1,1 @@
+export type PlanType = "FREE" | "BASIC" | "PRO" | "ENTERPRISE";

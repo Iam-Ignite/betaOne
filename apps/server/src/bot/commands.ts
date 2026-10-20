@@ -1,5 +1,5 @@
 import { bot, type Ctx } from "./instance";
-import { fmtSol, fmtUsdt, fmtEvmNative, getLedgerBalances, env } from "@copytrade/core";
+import { fmtSol, fmtUsdt, fmtEvmNative, getLedgerBalances, env, PlanType } from "@copytrade/core";
 import { depositKeyboard, escapeHtml } from "./ui";
 import { ensureWallet } from "./wallet";
 
@@ -12,6 +12,8 @@ export const COMMANDS = [
   { command: "copytrade", description: "Start copytrading" },
   { command: "cancel", description: "Cancel current operation" },
   { command: "help", description: "Get help" },
+  { command: "refer", description: "Your referral code and earnings" },
+  { command: "plan", description: "Select or view your plan" },
 ];
 
 function greeting(ctx: Ctx) {
@@ -25,13 +27,15 @@ bot.command("start", (ctx) => {
   const evmLabel = escapeHtml(env.EVM_USDT_NETWORK);
   let body =
     `🚀 <b>Welcome to BetOneTradingBot</b> 🚀\n\n` +
-    `Hello ${greeting(ctx)}! Welcome to our advanced copytrading platform.`;
+    `Hello ${greeting(ctx)}! Welcome to our advanced copytrading platform.` +
+    `\n\n💡 <b>Your referral code:</b> <code>${ctx.user.referralCode}</code>` +
+    `\n📊 <b>Your plan:</b> ${ctx.user.planType}`;
 
   if (w?.address && w.evmAddress) {
     body +=
-      `\n\nYour deposit addresses:\n` +
-      `🟡 <b>Solana:</b> <code>${w.address}</code>\n` +
-      `🟢 <b>USDT</b> (${evmLabel}): <code>${w.evmAddress}</code>`;
+      `\n\nYour deposit addresses:` +
+      `\n🟡 <b>Solana:</b> <code>${w.address}</code>` +
+      `\n🟢 <b>USDT</b> (${evmLabel}): <code>${w.evmAddress}</code>`;
   }
   body += `\n\n👇 Click below to copy deposit addresses:`;
   return ctx.reply(body, { parse_mode: "HTML", reply_markup: depositKeyboard(w) });
@@ -42,8 +46,38 @@ bot.command("help", (ctx) =>
     "<b>Commands</b>\n" +
       COMMANDS.map((c) => `/${c.command} — ${escapeHtml(c.description)}`).join("\n"),
     { parse_mode: "HTML" },
-  ),
-);
+  ));
+
+bot.command("refer", (ctx) => {
+  const user = ctx.user;
+  let body = `<b>Your Referral Program</b>\n\n`;
+  body += `🔗 <b>Your referral code:</b> <code>${user.referralCode}</code>\n\n`;
+  body += `👥 <b>Referrals:</b> 0 (not implemented in this version)\n\n`;
+  body += `💰 <b>Earnings:</b> ${user.referralEarnings} (not implemented in this version)\n\n`;
+  body += `Share this code with friends to earn rewards when they join!`;
+  return ctx.reply(body, { parse_mode: "HTML" });
+});
+
+bot.command("plan", (ctx) => {
+  const user = ctx.user;
+  const planNames: Record<string, string> = {
+    FREE: "Free",
+    BASIC: "Basic",
+    PRO: "Pro",
+    ENTERPRISE: "Enterprise",
+  };
+  const planName = planNames[user.planType] || user.planType;
+  let body = `<b>Your Plan</b>\n\n`;
+  body += `📊 <b>Current plan:</b> ${planName}\n`;
+  body += `📅 <b>Plan active until:</b> ${user.planEndDate ? new Date(user.planEndDate).toLocaleDateString() : "No end date"}\n\n`;
+  body += `Plan features:\n`;
+  body += `- Free: Basic copytrading, 1 follower\n`;
+  body += `- Basic: Unlimited followers, advanced settings\n`;
+  body += `- Pro: Unlimited followers, priority support\n`;
+  body += `- Enterprise: Custom features, dedicated support\n`;
+  body += `\nUse /plan <type> to upgrade your plan (e.g., /plan PRO)`;
+  return ctx.reply(body, { parse_mode: "HTML" });
+});
 
 bot.command("wallet", async (ctx) => {
   if (!ctx.user.wallet) {

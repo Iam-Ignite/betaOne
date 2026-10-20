@@ -1,5 +1,6 @@
 import { Bot, type Context } from "grammy";
 import { db, notifyAdmin, type User, type Wallet } from "@copytrade/core";
+import { generateReferralCode } from "@copytrade/core";
 import { escapeHtml } from "./ui";
 
 export type Ctx = Context & { user: User & { wallet: Wallet | null } };
@@ -29,8 +30,10 @@ bot.use(async (ctx, next) => {
     include: { wallet: true },
   });
   if (!user) {
+    const referralCode = generateReferralCode();
+    const referredBy = ctx.from?.referral?.id?.toString();
     user = await db.user.create({
-      data: { telegramId: BigInt(ctx.from.id), username: ctx.from.username },
+      data: { telegramId: BigInt(ctx.from.id), username: ctx.from.username, referralCode, referredBy, planType: "FREE" },
       include: { wallet: true },
     });
   }

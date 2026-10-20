@@ -119,6 +119,16 @@ model PaperPosition {
   @@unique([followId, tokenMint])
 }
 
+model Plan {
+  id          String          @id
+  name        String
+  planType    PlanType
+  price       BigInt
+  features    Json?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime
+}
+
 model Setting {
   key   String @id
   value String
@@ -135,20 +145,24 @@ model Trader {
 }
 
 model User {
-  id          String        @id
-  telegramId  BigInt        @unique
-  username    String?
-  status      UserStatus    @default(ACTIVE)
-  pinHash     String?
-  pending     Json?
-  createdAt   DateTime      @default(now())
-  balanceBnb  BigInt        @default(0)
-  balanceSol  BigInt        @default(0)
-  balanceUsdt BigInt        @default(0)
-  Follow      Follow[]
-  LedgerEntry LedgerEntry[]
-  Wallet      Wallet?
-  Withdrawal  Withdrawal[]
+  id                String        @id
+  telegramId        BigInt        @unique
+  username          String?
+  status            UserStatus    @default(ACTIVE)
+  pinHash           String?
+  referralCode      String?       @unique
+  referredBy        String?
+  referralEarnings  BigInt        @default(0)
+  createdAt         DateTime      @default(now())
+  balanceBnb        BigInt        @default(0)
+  balanceSol        BigInt        @default(0)
+  balanceUsdt       BigInt        @default(0)
+  planType          PlanType      @default(FREE)
+  planEndDate       DateTime?
+  Follow            Follow[]
+  LedgerEntry       LedgerEntry[]
+  Wallet            Wallet?
+  Withdrawal        Withdrawal[]
 }
 
 model Wallet {
@@ -201,6 +215,13 @@ enum Side {
 enum UserStatus {
   ACTIVE
   FROZEN
+}
+
+enum PlanType {
+  FREE
+  BASIC
+  PRO
+  ENTERPRISE
 }
 
 enum WithdrawAsset {
