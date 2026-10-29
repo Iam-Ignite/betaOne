@@ -15,9 +15,9 @@ const ALLOWED_UPDATES = ["message", "callback_query"] as const;
 
 /** Shown on Telegram's "What can this bot do?" screen before /start. */
 const BOT_DESCRIPTION =
-  "Your friendly crypto trading assistant. Get daily coin picks, copy experienced traders automatically, and keep your funds in your own wallet — no experience needed.";
+  "Alpha Trading Bot — Your friendly crypto trading assistant. Get daily coin picks, copy experienced traders automatically, and keep your funds in your own wallet — no experience needed.";
 /** Short blurb shown on the bot's profile / share card. */
-const BOT_SHORT_DESCRIPTION = "Coin picks & copy trading, explained simply.";
+const BOT_SHORT_DESCRIPTION = "Alpha Trading Bot: Coin picks & copy trading, explained simply.";
 
 function isLocalHostname(url: string): boolean {
   try {

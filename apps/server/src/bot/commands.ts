@@ -50,7 +50,7 @@ function startText(ctx: Ctx) {
   const rank = getPlan(ctx.user.planType);
   const w = ctx.user.wallet;
   let body =
-    `🐺 <b>Welcome to BetOneTradingBot!</b>\n\n` +
+    `🐺 <b>Welcome to Alpha Trading Bot!</b>\n\n` +
     `Hi ${greeting(ctx)} 👋 I'm your crypto trading assistant. You don't need any experience — I'll walk you through everything one step at a time.\n\n` +
     `<b>What I can do for you:</b>\n` +
     `🔍 Find a coin worth watching (a "pick")\n` +
