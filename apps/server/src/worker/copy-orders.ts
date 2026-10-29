@@ -102,9 +102,50 @@ export async function processCopyOrder(orderId: string) {
         inAmountRaw: amount.toString(),
         outAmountRaw: out.toString(),
       });
-      const pnl =
-        plan.kind === "sell" && paperPos ? ` (P/L ${fmtSol(out - paperPos.costLamports)} SOL)` : "";
-      await notify(tg, `✅ <b>${swap.side}</b> ${tokenMint.slice(0, 6)}…${pnl}`);
+      if (plan.kind === "sell" && paperPos) {
+        const pnl = out - paperPos.costLamports;
+        if (pnl > 0n && user.referredBy) {
+          try {
+            const referrer = await db.user.findUnique({ where: { id: user.referredBy } });
+            if (referrer) {
+              const commission = (pnl * 5n) / 100n;
+              if (commission > 0n) {
+                await applyLedger({
+                  userId: referrer.id,
+                  asset: "SOL",
+                  deltaRaw: commission,
+                  reason: "referral_commission",
+                  refId: order.id,
+                });
+                await db.user.update({
+                  where: { id: referrer.id },
+                  data: { referralEarnings: { increment: commission } } as never,
+                });
+                await notify(
+                  referrer.telegramId,
+                  `🎁 <b>Referral reward</b>\n\n` +
+                    `You earned <b>${fmtSol(commission)} SOL</b> (5% of profit) from your friend's successful trade.`,
+                );
+              }
+            }
+          } catch (e) {
+            console.error("referral commission failed", e);
+          }
+        }
+        await notify(
+          tg,
+          `🧪 <b>Practice trade</b>\n\n` +
+            `Sold <code>${tokenMint.slice(0, 6)}…</code>\nProfit / loss: ${fmtSol(pnl)} SOL\n` +
+            `<i>Practice mode — no real money was used.</i>`,
+        );
+        return;
+      }
+      await notify(
+        tg,
+        `🧪 <b>Practice trade</b>\n\n` +
+          `${plan.kind === "buy" ? "Bought" : "Sold"} <code>${tokenMint.slice(0, 6)}…</code>\n` +
+          `<i>Practice mode — no real money was used.</i>`,
+      );
       return;
     }
 
@@ -145,7 +186,10 @@ export async function processCopyOrder(orderId: string) {
         await finish(order.id, { status: "CONFIRMED", outAmountRaw: out.toString() });
         await notify(
           tg,
-          `✅ <b>BUY</b> ${tokenMint.slice(0, 6)}… copied from <b>${follow.trader.label}</b>\nSpent ${fmtSol(plan.lamports)} SOL`,
+          `✅ <b>Copied a buy</b>\n\n` +
+            `Coin: <code>${tokenMint.slice(0, 6)}…</code>\n` +
+            `Spent: <b>${fmtSol(plan.lamports)} SOL</b>\n` +
+            `Copied from: <b>${follow.trader.label}</b>`,
         );
         return;
       }
@@ -168,11 +212,42 @@ export async function processCopyOrder(orderId: string) {
       });
       await db.livePosition.delete({ where: { id: livePos!.id } });
       const pnl = proceeds - livePos!.costLamports;
+      if (pnl > 0n && user.referredBy) {
+        try {
+          const referrer = await db.user.findUnique({ where: { id: user.referredBy } });
+          if (referrer) {
+            const commission = (pnl * 5n) / 100n;
+            if (commission > 0n) {
+              await applyLedger({
+                userId: referrer.id,
+                asset: "SOL",
+                deltaRaw: commission,
+                reason: "referral_commission",
+                refId: order.id,
+              });
+              await db.user.update({
+                where: { id: referrer.id },
+                data: { referralEarnings: { increment: commission } } as never,
+              });
+              await notify(
+                referrer.telegramId,
+                `🎁 <b>Referral reward</b>\n\n` +
+                  `You earned <b>${fmtSol(commission)} SOL</b> (5% of profit) from your friend's successful trade.`,
+              );
+            }
+          }
+        } catch (e) {
+          console.error("referral commission failed", e);
+        }
+      }
       await finish(order.id, { status: "CONFIRMED", outAmountRaw: proceeds.toString() });
       await notify(
         tg,
-        `✅ <b>SELL</b> ${tokenMint.slice(0, 6)}… copied from <b>${follow.trader.label}</b>\n` +
-          `Received ${fmtSol(proceeds)} SOL (P/L ${fmtSol(pnl)})`,
+        `✅ <b>Copied a sell</b>\n\n` +
+          `Coin: <code>${tokenMint.slice(0, 6)}…</code>\n` +
+          `Received: <b>${fmtSol(proceeds)} SOL</b>\n` +
+          `Profit / loss: <b>${fmtSol(pnl)} SOL</b>\n` +
+          `Copied from: <b>${follow.trader.label}</b>`,
       );
       return;
     }
@@ -230,8 +305,11 @@ export async function processCopyOrder(orderId: string) {
         reserved = null; // committed, never refunded
         await notify(
           tg,
-          `✅ <b>BUY</b> ${tokenMint.slice(0, 6)}… copied from <b>${follow.trader.label}</b>\n` +
-            `Spent ${fmtSol(plan.lamports)} SOL\nhttps://solscan.io/tx/${signature}`,
+          `✅ <b>Copied a buy</b>\n\n` +
+            `Coin: <code>${tokenMint.slice(0, 6)}…</code>\n` +
+            `Spent: <b>${fmtSol(plan.lamports)} SOL</b>\n` +
+            `Copied from: <b>${follow.trader.label}</b>\n` +
+            `<a href="https://solscan.io/tx/${signature}">View transaction</a>`,
         );
         return;
       }
@@ -266,11 +344,43 @@ export async function processCopyOrder(orderId: string) {
       });
       await db.livePosition.delete({ where: { id: livePos!.id } });
       const pnl = proceeds - livePos!.costLamports;
+      if (pnl > 0n && user.referredBy) {
+        try {
+          const referrer = await db.user.findUnique({ where: { id: user.referredBy } });
+          if (referrer) {
+            const commission = (pnl * 5n) / 100n;
+            if (commission > 0n) {
+              await applyLedger({
+                userId: referrer.id,
+                asset: "SOL",
+                deltaRaw: commission,
+                reason: "referral_commission",
+                refId: order.id,
+              });
+              await db.user.update({
+                where: { id: referrer.id },
+                data: { referralEarnings: { increment: commission } } as never,
+              });
+              await notify(
+                referrer.telegramId,
+                `🎁 <b>Referral reward</b>\n\n` +
+                  `You earned <b>${fmtSol(commission)} SOL</b> (5% of profit) from your friend's successful trade.`,
+              );
+            }
+          }
+        } catch (e) {
+          console.error("referral commission failed", e);
+        }
+      }
       await finish(order.id, { status: "CONFIRMED", txSignature: signature, outAmountRaw: proceeds.toString() });
       await notify(
         tg,
-        `✅ <b>SELL</b> ${tokenMint.slice(0, 6)}… copied from <b>${follow.trader.label}</b>\n` +
-          `Received ${fmtSol(proceeds)} SOL (P/L ${fmtSol(pnl)})\nhttps://solscan.io/tx/${signature}`,
+        `✅ <b>Copied a sell</b>\n\n` +
+          `Coin: <code>${tokenMint.slice(0, 6)}…</code>\n` +
+          `Received: <b>${fmtSol(proceeds)} SOL</b>\n` +
+          `Profit / loss: <b>${fmtSol(pnl)} SOL</b>\n` +
+          `Copied from: <b>${follow.trader.label}</b>\n` +
+          `<a href="https://solscan.io/tx/${signature}">View transaction</a>`,
       );
     } catch (e) {
       if (reserved !== null) await refundBuy(order.id, user.id);
@@ -284,6 +394,12 @@ export async function processCopyOrder(orderId: string) {
       return; // do not spam users with every skip
     }
     await finish(order.id, { status: "FAILED", error: String(e?.message ?? e).slice(0, 500) });
-    await notify(tg, `❌ Copy trade failed: ${String(e?.message ?? e).slice(0, 120)}`);
+    await notify(
+      tg,
+      `⚠️ <b>A copied trade didn't go through</b>\n\n` +
+        `Reason: ${String(e?.message ?? e).slice(0, 120)}\n\n` +
+        `Any funds reserved for this trade were returned to your balance.\n\n` +
+        `I'll keep copying the next trade.`,
+    );
   }
 }

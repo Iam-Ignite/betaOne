@@ -14,69 +14,109 @@ services:
     plan: free
     region: oregon
     rootDir: .
-    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @copytrade/core db:generate
+    buildCommand: pnpm install --frozen-lockfile
     startCommand: pnpm --filter server start:prod
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION
         value: "22.14.0"
       # Required — fill these in Render Dashboard → Environment.
-      - key: DATABASE_URL
-        sync: false
-      - key: DIRECT_URL
-        sync: false
+      - key: MONGODB_URI
+        value: ""
+        sync: true
       - key: TELEGRAM_BOT_TOKEN
-        sync: false
+        value: ""
+        sync: true
       - key: TELEGRAM_WEBHOOK_SECRET
-        sync: false
+        value: ""
+        sync: true
       - key: WALLET_KEK_BASE64
-        sync: false
+        value: ""
+        sync: true
       # Public URL of THIS service (Telegram + Helius webhooks point here), and the
       # Vercel web origin allowed to call it from the browser (mini app).
       - key: PUBLIC_BASE_URL
-        sync: false
+        value: ""
+        sync: true
       - key: CORS_ORIGIN
-        sync: false
-      # Admin API basic auth (must match the web app's ADMIN_USER / ADMIN_PASSWORD).
+        value: ""
+        sync: true
+      # Admin API auth (API key or basic auth matching web app).
       - key: ADMIN_USER
-        sync: false
+        value: ""
+        sync: true
       - key: ADMIN_PASSWORD
-        sync: false
+        value: ""
+        sync: true
+      - key: API_KEY
+        value: ""
+        sync: true
       # Recommended — admin deposit/error alerts, chain + swap providers.
       - key: TELEGRAM_ADMIN_CHAT_ID
-        sync: false
+        value: ""
+        sync: true
+      # Helius
       - key: HELIUS_RPC_URL
-        sync: false
+        value: ""
+        sync: true
       - key: HELIUS_API_KEY
-        sync: false
+        value: ""
+        sync: true
       - key: HELIUS_WEBHOOK_ID
-        sync: false
+        value: ""
+        sync: true
       - key: HELIUS_WEBHOOK_SECRET
-        sync: false
+        value: ""
+        sync: true
       - key: JUPITER_API_KEY
-        sync: false
+        value: ""
+        sync: true
+      # EVM
       - key: EVM_RPC_URL
-        sync: false
+        value: ""
+        sync: true
+      - key: EVM_USDT_NETWORK
+        value: "BNB Smart Chain (BEP-20)"
+      - key: EVM_CHAIN_ID
+        value: "56"
+      - key: EVM_USDT_ADDRESS
+        value: "0x55d398326f99059fF775485246999027B3197955"
+      - key: EVM_USDT_DECIMALS
+        value: "18"
+      - key: EVM_EXPLORER_URL
+        value: "https://bscscan.com"
+      - key: EVM_GAS_SYMBOL
+        value: "BNB"
       # Pooled custody / safety defaults.
       - key: OPERATOR_SOL_ADDRESS
-        sync: false
+        value: ""
+        sync: true
       - key: OPERATOR_EVM_ADDRESS
-        sync: false
+        value: ""
+        sync: true
       - key: OPERATOR2_SOL_ADDRESS
-        sync: false
+        value: ""
+        sync: true
       - key: OPERATOR2_EVM_ADDRESS
-        sync: false
+        value: ""
+        sync: true
       - key: OPERATOR2_SHARE
+        sync: true
         value: "0"
       - key: SWEEP_DEPOSITS
+        sync: true
         value: "true"
       - key: TRADING_ENABLED
+        sync: true
         value: "true"
       - key: SIMULATE_TRADING
+        sync: true
         value: "true"
       - key: LIVE_TRADING_ALLOWED
+        sync: true
         value: "false"
       - key: WORKER_KEEPALIVE_MS
+        sync: true
         value: "600000"
 
 # Optional: Daily reconciliation cron job (runs at 03:00 UTC).
@@ -88,29 +128,27 @@ services:
 #     plan: free
 #     region: oregon
 #     rootDir: .
-#     buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @copytrade/core db:generate
+#     buildCommand: pnpm install --frozen-lockfile
 #     schedule: "0 3 * * *"  # 03:00 UTC daily
 #     startCommand: pnpm --filter server reconcile
 #     envVars:
-#       - key: DATABASE_URL
-#         sync: false
-#       - key: DIRECT_URL
-#         sync: false
+#       - key: MONGODB_URI
+#         sync: true
 #       - key: HELIUS_RPC_URL
-#         sync: false
+#         sync: true
 #       - key: HELIUS_API_KEY
-#         sync: false
+#         sync: true
 #       - key: EVM_RPC_URL
-#         sync: false
+#         sync: true
 #       - key: OPERATOR_SOL_ADDRESS
-#         sync: false
+#         sync: true
 #       - key: TELEGRAM_ADMIN_CHAT_ID
-#         sync: false
+#         sync: true
 #       - key: WALLET_KEK_BASE64
-#         sync: false
+#         sync: true
 #       - key: TRADING_ENABLED
-#         sync: false
+#         sync: true
 #       - key: LIVE_TRADING_ALLOWED
-#         sync: false
+#         sync: true
 #       - key: SIMULATE_TRADING
-#         sync: false
+#         sync: true

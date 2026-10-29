@@ -17,5 +17,8 @@
     "set-webhook": "pnpm --filter server set-webhook",
     "create-helius-webhook": "pnpm --filter server create-helius-webhook"
   },
+  "devDependencies": {
+    "esbuild": "0.23"
+  },
   "packageManager": "pnpm@9.11.0"
 }

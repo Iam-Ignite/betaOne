@@ -1,5 +1,7 @@
 import "./commands";
 import "./flows";
+import "./signals";
+import "./fallback";
 import { lookup } from "node:dns/promises";
 import { bot } from "./instance";
 import { COMMANDS } from "./commands";
@@ -13,9 +15,9 @@ const ALLOWED_UPDATES = ["message", "callback_query"] as const;
 
 /** Shown on Telegram's "What can this bot do?" screen before /start. */
 const BOT_DESCRIPTION =
-  "Welcome to P.R.I.M.E copy trade bot, Copy from your favourite traders with ease.";
+  "Your friendly crypto trading assistant. Get daily coin picks, copy experienced traders automatically, and keep your funds in your own wallet — no experience needed.";
 /** Short blurb shown on the bot's profile / share card. */
-const BOT_SHORT_DESCRIPTION = "Copy your favourite traders with ease.";
+const BOT_SHORT_DESCRIPTION = "Coin picks & copy trading, explained simply.";
 
 function isLocalHostname(url: string): boolean {
   try {

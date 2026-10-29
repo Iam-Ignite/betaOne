@@ -58,7 +58,7 @@ export function evmChain(): Chain {
 export const evmUsdtAddress = () =>
   getAddress(process.env.EVM_USDT_ADDRESS ?? "0x55d398326f99059fF775485246999027B3197955");
 
-export const evmUsdtDecimals = () => Number(process.env.EVM_USDT_DECIMALS ?? 18);
+export const evmUsdtDecimals = () => 6;
 
 export const evmExplorerTx = (hash: string) =>
   `${process.env.EVM_EXPLORER_URL ?? "https://bscscan.com"}/tx/${hash}`;
@@ -66,9 +66,9 @@ export const evmExplorerTx = (hash: string) =>
 /** Gas left untouched when sweeping the full native balance (BEP-20 transfers cost ~0.0001 BNB). */
 export const EVM_GAS_RESERVE_WEI = 500_000_000_000_000n; // 0.0005 BNB
 
-export const fmtUsdt = (raw: bigint) => formatUnits(raw, evmUsdtDecimals());
+export const fmtUsdt = (raw: bigint) => formatUnits(raw, 6);
 export const fmtEvmNative = (raw: bigint) => formatUnits(raw, 18);
-export const parseUsdt = (text: string) => parseUnits(text, evmUsdtDecimals());
+export const parseUsdt = (text: string) => parseUnits(text, 6);
 
 function publicClient(): PublicClient {
   const chain = evmChain();

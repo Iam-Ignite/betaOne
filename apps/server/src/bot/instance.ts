@@ -1,6 +1,12 @@
 import { Bot, type Context } from "grammy";
-import { db, notifyAdmin, type User, type Wallet } from "@copytrade/core";
-import { generateReferralCode } from "@copytrade/core";
+import {
+  db,
+  Prisma,
+  notifyAdmin,
+  generateReferralCode,
+  type User,
+  type Wallet,
+} from "@copytrade/core";
 import { escapeHtml } from "./ui";
 
 export type Ctx = Context & { user: User & { wallet: Wallet | null } };
@@ -31,18 +37,58 @@ bot.use(async (ctx, next) => {
   });
   if (!user) {
     const referralCode = generateReferralCode();
-    const referredBy = ctx.from?.referral?.id?.toString();
+    let referredBy: string | null = null;
+    const startText = ctx.message?.text || (ctx.channelPost?.text) || "";
+    if (startText.startsWith("/start")) {
+      const parts = startText.split(/\s+/);
+      const code = parts[1]?.trim();
+      if (code && code.length > 0) {
+        const referrer = await db.user.findFirst({ where: { referralCode: code } as any });
+        if (referrer) {
+          referredBy = referrer.id;
+        }
+      }
+    }
+    if (!referredBy && (ctx.from as any)?.referral?.id) {
+      const ref = (ctx.from as any).referral.id.toString();
+      const referrer = await db.user.findFirst({ where: { referralCode: ref } as any });
+      if (referrer) {
+        referredBy = referrer.id;
+      }
+    }
     user = await db.user.create({
-      data: { telegramId: BigInt(ctx.from.id), username: ctx.from.username, referralCode, referredBy, planType: "FREE" },
+      data: {
+        telegramId: BigInt(ctx.from.id),
+        username: ctx.from.username ?? null,
+        referralCode,
+        referredBy,
+        planType: "OMEGA",
+        pending: !referredBy ? ({ action: "referral_code" } as any) : undefined,
+      },
       include: { wallet: true },
     });
+    if (!referredBy) {
+      await ctx.reply(
+        `👋 <b>Welcome!</b>\n\nDid someone invite you to this bot?\n\nIf yes, please send me their <b>referral code</b>. Otherwise just type <b>skip</b>.`,
+        { parse_mode: "HTML" },
+      );
+    }
   }
   // Wallets are created lazily on first Deposit / Copy-address tap (see wallet.ts),
   // so people who only look around never get a key pair minted.
   if (user.status === "FROZEN") {
-    return ctx.reply("Your account is paused. Contact support.");
+    return ctx.reply(
+      "⏸ <b>Your account is paused</b>\n\nPlease contact support and we'll help you get back in.",
+      { parse_mode: "HTML" },
+    );
   }
-  ctx.user = user;
+  // Any slash command abandons a half-finished text step (e.g. typing /help
+  // while halfway through a withdrawal) so users never get stuck in a flow.
+  if (ctx.message?.text?.startsWith("/") && user.pending) {
+    await db.user.update({ where: { id: user.id }, data: { pending: Prisma.DbNull } });
+    user = { ...user, pending: null };
+  }
+  ctx.user = user as User & { wallet: Wallet | null };
   await next();
 });
 
@@ -51,11 +97,17 @@ bot.use(async (ctx, next) => {
 // the admin chat when TELEGRAM_ADMIN_CHAT_ID is configured.
 bot.catch((err) => {
   const { ctx } = err;
-  const cause =
-    err.error instanceof Error ? (err.error.stack ?? err.error.message) : String(err.error);
-  console.error(`[bot] error handling update ${ctx.update.update_id}:`, err.error);
+  const error = err.error as Error | unknown;
+  const cause = error instanceof Error ? (error.stack ?? error.message) : String(error);
+  const update = ctx.update as any;
+  const updateId = update?.update_id ?? "unknown";
+  console.error(`[bot] error handling update ${updateId}:`, cause);
   const who = ctx.from ? `user ${ctx.from.id}` : "an unknown user";
-  notifyAdmin(`⚠️ <b>Bot error</b> for ${who}\n<pre>${escapeHtml(cause).slice(0, 800)}</pre>`);
-  // Best-effort reply so the user isn't left staring at nothing.
-  ctx.reply("⚠️ Something went wrong. Please try again.").catch(() => {});
+  notifyAdmin(`⚠️ <b>Bot error</b> for ${who}\n<pre>${escapeHtml(cause).slice(0, 800)}</pre>`).catch(() => {});
+  try {
+    if (ctx.callbackQuery) {
+      ctx.answerCallbackQuery().catch(() => {});
+    }
+    ctx.reply("⚠️ Something went wrong. Please try again.").catch(() => {});
+  } catch {}
 });

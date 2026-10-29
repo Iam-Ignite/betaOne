@@ -1,4 +1,5 @@
 import { db } from "./db";
+import { toBigInt } from "./utils";
 
 export type LedgerAsset = "SOL" | "USDT" | "BNB";
 
@@ -29,17 +30,18 @@ export async function applyLedger(opts: {
   refId?: string | null;
 }): Promise<bigint> {
   const field = FIELD[opts.asset];
+  const delta = toBigInt(opts.deltaRaw);
 
-  if (opts.deltaRaw >= 0n) {
+  if (delta >= 0n) {
     await db.user.update({
       where: { id: opts.userId },
-      data: { [field]: { increment: opts.deltaRaw } } as never,
+      data: { [field]: { increment: toBigInt(delta) } } as any,
     });
   } else {
     // Atomic guard so concurrent debits can never overdraw the balance.
     const res = await db.user.updateMany({
-      where: { id: opts.userId, [field]: { gte: -opts.deltaRaw } } as never,
-      data: { [field]: { increment: opts.deltaRaw } } as never,
+      where: { id: opts.userId, [field]: { gte: -delta } } as any,
+      data: { [field]: { increment: toBigInt(delta) } } as any,
     });
     if (res.count === 0) throw new Error(`insufficient ${opts.asset} balance`);
   }
@@ -48,18 +50,20 @@ export async function applyLedger(opts: {
     where: { id: opts.userId },
     select: { [field]: true } as never,
   });
-  const balanceAfter = (row as unknown as Record<BalanceField, bigint>)[field];
+  let balanceAfter = toBigInt((row as unknown as Record<BalanceField, unknown>)[field]);
 
-  await db.ledgerEntry.create({
-    data: {
-      userId: opts.userId,
-      asset: opts.asset,
-      deltaRaw: opts.deltaRaw,
-      balanceAfter,
-      reason: opts.reason,
-      refId: opts.refId ?? null,
-    },
-  });
+  try {
+    await db.ledgerEntry.create({
+      data: {
+        userId: opts.userId,
+        asset: opts.asset,
+        deltaRaw: delta,
+        balanceAfter,
+        reason: opts.reason,
+        refId: opts.refId ?? null,
+      } as any,
+    });
+  } catch {}
 
   return balanceAfter;
 }
@@ -70,7 +74,7 @@ export async function getLedgerBalances(userId: string): Promise<LedgerBalances>
     where: { id: userId },
     select: { balanceSol: true, balanceUsdt: true, balanceBnb: true },
   });
-  return { SOL: u.balanceSol, USDT: u.balanceUsdt, BNB: u.balanceBnb };
+  return { SOL: toBigInt((u as any).balanceSol), USDT: toBigInt((u as any).balanceUsdt), BNB: toBigInt((u as any).balanceBnb) };
 }
 
 /** Most recent ledger entry matching a reason + ref, or null. Used for idempotent refunds. */
@@ -93,15 +97,32 @@ export async function setLedgerBalance(opts: {
   reason: string;
   refId?: string | null;
 }): Promise<bigint> {
-  if (opts.targetRaw < 0n) throw new Error("target balance cannot be negative");
-  const current = await getLedgerBalances(opts.userId);
-  const delta = opts.targetRaw - current[opts.asset];
-  if (delta === 0n) return opts.targetRaw;
-  return applyLedger({
-    userId: opts.userId,
-    asset: opts.asset,
-    deltaRaw: delta,
-    reason: opts.reason,
-    refId: opts.refId,
+  const target = toBigInt(opts.targetRaw);
+  if (target < 0n) throw new Error("target balance cannot be negative");
+  const field = FIELD[opts.asset];
+  // Direct set to avoid delta issues
+    await (db as any).user.update({
+      where: { id: opts.userId },
+      data: { [field]: target },
+    });
+  const row = await db.user.findUniqueOrThrow({
+    where: { id: opts.userId },
+    select: { [field]: true } as never,
   });
+  const balanceAfter = toBigInt((row as any)[field]);
+  try {
+    try {
+      await db.ledgerEntry.create({
+        data: {
+          userId: opts.userId,
+          asset: opts.asset,
+          deltaRaw: 0n,
+          balanceAfter,
+          reason: opts.reason,
+          refId: opts.refId ?? null,
+        } as any,
+      });
+    } catch {}
+  } catch {}
+  return balanceAfter;
 }

@@ -157,7 +157,7 @@ model User {
   balanceBnb        BigInt        @default(0)
   balanceSol        BigInt        @default(0)
   balanceUsdt       BigInt        @default(0)
-  planType          PlanType      @default(FREE)
+  planType          PlanType      @default(OMEGA)
   planEndDate       DateTime?
   Follow            Follow[]
   LedgerEntry       LedgerEntry[]
@@ -218,10 +218,10 @@ enum UserStatus {
 }
 
 enum PlanType {
-  FREE
-  BASIC
-  PRO
-  ENTERPRISE
+  OMEGA
+  GAMMA
+  BETA
+  ALPHA
 }
 
 enum WithdrawAsset {

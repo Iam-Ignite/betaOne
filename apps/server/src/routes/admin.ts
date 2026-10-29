@@ -10,6 +10,7 @@ import {
   fmtSol,
   fmtUsdt,
   fmtEvmNative,
+  toBigInt,
   evmExplorerTx,
   getPoolAddress,
   getPoolBalance,
@@ -22,23 +23,60 @@ import { tradingText, followKeyboard } from "../bot/ui";
 
 export const adminRouter = Router();
 
-const safeEq = (a: string, b: string) =>
-  a.length === b.length && timingSafeEqual(Buffer.from(a), Buffer.from(b));
+const safeEq = (a: string, b: string) => {
+  if (!a || !b || a.length !== b.length) return false;
+  return timingSafeEqual(Buffer.from(a), Buffer.from(b));
+};
 
-/** Basic auth for the whole /admin/* surface. */
+/** API Key and Basic auth for the whole /admin/* surface. */
 adminRouter.use("/admin", (req: Request, res: Response, next: NextFunction) => {
-  const header = req.headers.authorization ?? "";
-  if (header.startsWith("Basic ")) {
-    const [user, pass] = Buffer.from(header.slice(6), "base64").toString().split(":");
-    if (safeEq(user ?? "", process.env.ADMIN_USER ?? "") && safeEq(pass ?? "", process.env.ADMIN_PASSWORD ?? "")) {
+  const apiKey = req.header("x-api-key");
+  const authHeader = req.header("authorization") ?? "";
+  const validKey = process.env.API_KEY;
+  const validUser = process.env.ADMIN_USER;
+  const validPass = process.env.ADMIN_PASSWORD;
+
+  // 1. Check x-api-key header
+  if (apiKey && validKey && safeEq(apiKey, validKey)) {
+    return next();
+  }
+
+  // 2. Check Bearer token
+  if (authHeader.startsWith("Bearer ") && validKey) {
+    const token = authHeader.slice(7).trim();
+    if (safeEq(token, validKey)) {
       return next();
     }
   }
-  res.set("WWW-Authenticate", 'Basic realm="admin"').status(401).send("Auth required");
+
+  // 3. Check Basic auth
+  if (authHeader.startsWith("Basic ")) {
+    try {
+      const decoded = Buffer.from(authHeader.slice(6), "base64").toString("utf8");
+      const colonIdx = decoded.indexOf(":");
+      if (colonIdx !== -1) {
+        const u = decoded.slice(0, colonIdx);
+        const p = decoded.slice(colonIdx + 1);
+
+        if (validUser && validPass && safeEq(u, validUser) && safeEq(p, validPass)) {
+          return next();
+        }
+        if (validKey && (safeEq(p, validKey) || safeEq(u, validKey))) {
+          return next();
+        }
+      }
+    } catch {
+      // ignore decode error
+    }
+  }
+
+  res.status(401).send("Auth required");
 });
 
-const fmtAmount = (asset: string, raw: bigint) =>
-  asset === "USDT" ? `${fmtUsdt(raw)} USDT` : asset === "BNB" ? `${fmtEvmNative(raw)} BNB` : `${fmtSol(raw)} SOL`;
+const fmtAmount = (asset: string, raw: bigint | unknown) => {
+  const b = toBigInt(raw);
+  return asset === "USDT" ? `${fmtUsdt(b)} USDT` : asset === "BNB" ? `${fmtEvmNative(b)} BNB` : `${fmtSol(b)} SOL`;
+};
 
 /** Escape admin-supplied text so it can be sent safely with Telegram HTML parse mode. */
 const escapeHtml = (s: string) =>
@@ -64,7 +102,7 @@ adminRouter.get("/admin/dashboard", async (_req, res) => {
         where: { status: "PENDING" },
         orderBy: { createdAt: "asc" },
         take: 100,
-        include: { user: { select: { telegramId: true } } },
+        include: { user: true },
       }),
     ]);
 
@@ -73,7 +111,7 @@ adminRouter.get("/admin/dashboard", async (_req, res) => {
     getPoolBalance(),
     db.user.findMany({ select: { balanceSol: true } }),
   ]);
-  const liabilitySol = balances.reduce((sum, u) => sum + u.balanceSol, 0n);
+  const liabilitySol = balances.reduce((sum, u) => sum + toBigInt(u.balanceSol), 0n);
 
   res.json({
     stats: { users, follows, pending, withdrawals, failed24h },
@@ -84,7 +122,7 @@ adminRouter.get("/admin/dashboard", async (_req, res) => {
     },
     pendingWithdrawals: pendingWithdrawals.map((w) => ({
       id: w.id,
-      telegramId: w.user.telegramId.toString(),
+      telegramId: w.user?.telegramId ? w.user.telegramId.toString() : "",
       asset: w.asset,
       amountLabel: fmtAmount(w.asset, w.amountRaw),
       toAddress: w.toAddress,
@@ -144,18 +182,18 @@ adminRouter.get("/admin/users", async (_req, res) => {
       const active = u.follows.filter((f) => f.active);
       const pending = u.follows.find((f) => f.startedAt === null);
       return {
-        telegramId: u.telegramId.toString(),
+        telegramId: u.telegramId ? u.telegramId.toString() : "",
         username: u.username,
         status: u.status,
         balances: {
-          SOL: u.balanceSol.toString(),
-          USDT: u.balanceUsdt.toString(),
-          BNB: u.balanceBnb.toString(),
+          SOL: toBigInt(u.balanceSol).toString(),
+          USDT: toBigInt(u.balanceUsdt).toString(),
+          BNB: toBigInt(u.balanceBnb).toString(),
         },
         labels: {
-          SOL: fmtSol(u.balanceSol),
-          USDT: fmtUsdt(u.balanceUsdt),
-          BNB: fmtEvmNative(u.balanceBnb),
+          SOL: fmtSol(toBigInt(u.balanceSol)),
+          USDT: fmtUsdt(toBigInt(u.balanceUsdt)),
+          BNB: fmtEvmNative(toBigInt(u.balanceBnb)),
         },
         follows: {
           total: u.follows.length,
@@ -163,7 +201,7 @@ adminRouter.get("/admin/users", async (_req, res) => {
           paper: active.filter((f) => f.paper).length,
           live: active.filter((f) => !f.paper).length,
         },
-        copytrade: pending ? { id: pending.id, address: pending.trader.address } : null,
+        copytrade: pending ? { id: pending.id, address: pending.trader?.address ?? "" } : null,
         wallet: u.wallet ? { address: u.wallet.address, evmAddress: u.wallet.evmAddress } : null,
         pendingWithdrawals: pendingMap.get(u.id) ?? 0,
         createdAt: u.createdAt.toISOString(),
@@ -174,7 +212,7 @@ adminRouter.get("/admin/users", async (_req, res) => {
 
 const DECIMALS: Record<"SOL" | "USDT" | "BNB", number> = {
   SOL: 9,
-  USDT: evmUsdtDecimals(),
+  USDT: 6,
   BNB: 18,
 };
 
@@ -184,12 +222,12 @@ adminRouter.get("/admin/ledger", async (req, res) => {
   if (!telegramId) return res.status(400).json({ error: "telegramId required" });
   const user = await db.user.findUnique({ where: { telegramId: BigInt(telegramId) } });
   if (!user) return res.status(404).json({ error: "user not found" });
-  const b = await getLedgerBalances(user.id);
-  res.json({
-    userId: user.id,
-    username: user.username,
-    balances: { SOL: b.SOL.toString(), USDT: b.USDT.toString(), BNB: b.BNB.toString() },
-  });
+      const b = await getLedgerBalances(user.id);
+      res.json({
+        userId: user.id,
+        username: user.username,
+        balances: { SOL: toBigInt(b.SOL).toString(), USDT: toBigInt(b.USDT).toString(), BNB: toBigInt(b.BNB).toString() },
+      });
 });
 
 type LedgerBody = {
@@ -220,10 +258,10 @@ adminRouter.post("/admin/ledger", async (req, res) => {
     if (body.mode === "percent") {
       const pct = Number(body.amount);
       if (!Number.isFinite(pct)) return res.status(400).json({ error: "invalid percent" });
-      const current = (await getLedgerBalances(user.id))[asset];
+      const current = toBigInt((await getLedgerBalances(user.id))[asset]);
       const pctX100 = BigInt(Math.round(pct * 100));
       const delta = (current * pctX100) / 10000n;
-      const balanceAfter =
+      const balanceAfterRes =
         delta === 0n
           ? current
           : await applyLedger({
@@ -232,10 +270,11 @@ adminRouter.post("/admin/ledger", async (req, res) => {
               deltaRaw: delta,
               reason: body.reason?.trim() || `admin_percent_${pct}`,
             });
+      const balBig = toBigInt(balanceAfterRes);
       return res.json({
         ok: true,
-        balanceAfter: balanceAfter.toString(),
-        balanceAfterLabel: fmtAmount(asset, balanceAfter),
+        balanceAfter: balBig.toString(),
+        balanceAfterLabel: fmtAmount(asset, balBig),
       });
     }
 
@@ -245,14 +284,14 @@ adminRouter.post("/admin/ledger", async (req, res) => {
 
     let raw: bigint;
     try {
-      raw = parseUnits(body.amount, DECIMALS[asset]);
+      raw = toBigInt(parseUnits(body.amount, DECIMALS[asset]));
     } catch {
       return res.status(400).json({ error: "invalid amount" });
     }
 
-    let balanceAfter: bigint;
+    let balanceAfterRes2: bigint;
     if (body.action === "set") {
-      balanceAfter = await setLedgerBalance({
+      balanceAfterRes2 = await setLedgerBalance({
         userId: user.id,
         asset,
         targetRaw: raw,
@@ -260,17 +299,18 @@ adminRouter.post("/admin/ledger", async (req, res) => {
       });
     } else {
       if (raw <= 0n) return res.status(400).json({ error: "amount must be positive" });
-      balanceAfter = await applyLedger({
+      balanceAfterRes2 = await applyLedger({
         userId: user.id,
         asset,
         deltaRaw: body.action === "debit" ? -raw : raw,
         reason: body.reason?.trim() || `admin_${body.action}`,
       });
     }
+    let balBig2 = toBigInt(balanceAfterRes2);
     res.json({
       ok: true,
-      balanceAfter: balanceAfter.toString(),
-      balanceAfterLabel: fmtAmount(asset, balanceAfter),
+      balanceAfter: balBig2.toString(),
+      balanceAfterLabel: fmtAmount(asset, balBig2),
     });
   } catch (e) {
     res.status(400).json({ error: String((e as Error).message) });
@@ -454,9 +494,9 @@ adminRouter.get("/admin/copytrades", async (_req, res) => {
   res.json({
     pending: follows.map((f) => ({
       id: f.id,
-      telegramId: f.user.telegramId.toString(),
-      username: f.user.username,
-      address: f.trader.address,
+      telegramId: f.user?.telegramId ? f.user.telegramId.toString() : "",
+      username: f.user?.username ?? null,
+      address: f.trader?.address ?? "",
       paper: f.paper,
       createdAt: f.createdAt.toISOString(),
     })),

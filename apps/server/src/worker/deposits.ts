@@ -10,6 +10,7 @@ import {
   sweepWallet,
   notify,
   notifyAdmin,
+  toBigInt,
   type SweepOutcome,
 } from "@copytrade/core";
 
@@ -34,32 +35,48 @@ export async function checkDeposits() {
     // Solana SOL
     try {
       const now = await getSolBalance(w.address);
-      const delta = now - w.lastKnownLamports;
+      const lastKnown = toBigInt((w as any).lastKnownLamports);
+      const nowBig = toBigInt(now);
+      const delta = nowBig - lastKnown;
       if (delta > 1_000_000n) {
         // > 0.001 SOL increase
         const balance = await applyLedger({ userId: w.userId, asset: "SOL", deltaRaw: delta, reason: "deposit" });
         credits.push({ asset: "SOL", delta, balance });
-        await notify(tg, `📥 Deposit received: ${fmtSol(delta)} SOL\nBalance: <b>${fmtSol(balance)} SOL</b>`);
-        await db.wallet.update({ where: { id: w.id }, data: { lastKnownLamports: now } });
-      } else if (now !== w.lastKnownLamports) {
-        await db.wallet.update({ where: { id: w.id }, data: { lastKnownLamports: now } });
+        await notify(
+          tg,
+          `✅ <b>Deposit received!</b>\n\n` +
+            `Added: <b>${fmtSol(delta)} SOL</b>\n` +
+            `New balance: <b>${fmtSol(balance)} SOL</b>\n\n` +
+            `Tap /bestcoin to get a coin pick, or /copytrade to copy a trader.`,
+        );
+        await db.wallet.update({ where: { id: w.id }, data: { lastKnownLamports: nowBig } });
+      } else if (nowBig !== lastKnown) {
+        await db.wallet.update({ where: { id: w.id }, data: { lastKnownLamports: nowBig } });
       }
     } catch (e) {
       console.error("deposit sol", w.id, e);
     }
 
-    if (w.evmAddress) {
+    if ((w as any).evmAddress) {
       // BEP-20 USDT
       try {
-        const usdt = await getUsdtBalanceRaw(w.evmAddress);
-        if (usdt > w.lastKnownUsdt) {
-          const delta = usdt - w.lastKnownUsdt;
+        const usdt = await getUsdtBalanceRaw((w as any).evmAddress);
+        const usdtBig = toBigInt(usdt);
+        const lastKnownUsdt = toBigInt((w as any).lastKnownUsdt);
+        if (usdtBig > lastKnownUsdt) {
+          const delta = usdtBig - lastKnownUsdt;
           const balance = await applyLedger({ userId: w.userId, asset: "USDT", deltaRaw: delta, reason: "deposit" });
           credits.push({ asset: "USDT", delta, balance });
-          await notify(tg, `📥 Deposit received: ${fmtUsdt(delta)} USDT\nBalance: <b>${fmtUsdt(balance)} USDT</b>`);
-          await db.wallet.update({ where: { id: w.id }, data: { lastKnownUsdt: usdt } });
-        } else if (usdt !== w.lastKnownUsdt) {
-          await db.wallet.update({ where: { id: w.id }, data: { lastKnownUsdt: usdt } });
+          await notify(
+            tg,
+            `✅ <b>Deposit received!</b>\n\n` +
+              `Added: <b>${fmtUsdt(delta)} USDT</b>\n` +
+              `New balance: <b>${fmtUsdt(balance)} USDT</b>\n\n` +
+              `Tap /bestcoin to get a coin pick, or /copytrade to copy a trader.`,
+          );
+          await db.wallet.update({ where: { id: w.id }, data: { lastKnownUsdt: usdtBig } });
+        } else if (usdtBig !== lastKnownUsdt) {
+          await db.wallet.update({ where: { id: w.id }, data: { lastKnownUsdt: usdtBig } });
         }
       } catch (e) {
         console.error("deposit usdt", w.id, e);
@@ -67,15 +84,23 @@ export async function checkDeposits() {
 
       // Native BNB (used for gas)
       try {
-        const bnb = await getEvmNativeBalance(w.evmAddress);
-        if (bnb > w.lastKnownEvmNative) {
-          const delta = bnb - w.lastKnownEvmNative;
+        const bnb = await getEvmNativeBalance((w as any).evmAddress);
+        const bnbBig = toBigInt(bnb);
+        const lastKnownEvmNative = toBigInt((w as any).lastKnownEvmNative);
+        if (bnbBig > lastKnownEvmNative) {
+          const delta = bnbBig - lastKnownEvmNative;
           const balance = await applyLedger({ userId: w.userId, asset: "BNB", deltaRaw: delta, reason: "deposit" });
           credits.push({ asset: "BNB", delta, balance });
-          await notify(tg, `⛽ Deposit received: ${fmtEvmNative(delta)} BNB (gas)\nBalance: <b>${fmtEvmNative(balance)} BNB</b>`);
-          await db.wallet.update({ where: { id: w.id }, data: { lastKnownEvmNative: bnb } });
-        } else if (bnb !== w.lastKnownEvmNative) {
-          await db.wallet.update({ where: { id: w.id }, data: { lastKnownEvmNative: bnb } });
+          await notify(
+            tg,
+            `⛽ <b>Gas fee funds received</b>\n\n` +
+              `Added: <b>${fmtEvmNative(delta)} BNB</b>\n` +
+              `New balance: <b>${fmtEvmNative(balance)} BNB</b>\n\n` +
+              `This covers network fees for USDT transactions.`,
+          );
+          await db.wallet.update({ where: { id: w.id }, data: { lastKnownEvmNative: bnbBig } });
+        } else if (bnbBig !== lastKnownEvmNative) {
+          await db.wallet.update({ where: { id: w.id }, data: { lastKnownEvmNative: bnbBig } });
         }
       } catch (e) {
         console.error("deposit bnb", w.id, e);
@@ -84,8 +109,8 @@ export async function checkDeposits() {
 
     if (credits.length === 0) continue;
 
-    const outcome = await sweepDeposit(w);
-    await notifyAdmin(adminMessage(w.user.username, tg, credits, w.address, outcome));
+    const outcome = await sweepDeposit(w as any);
+    await notifyAdmin(adminMessage((w.user as any).username, tg, credits, w.address, outcome));
   }
 }
 

@@ -1,1 +1,1 @@
-export type PlanType = "FREE" | "BASIC" | "PRO" | "ENTERPRISE";
+export type PlanType = "OMEGA" | "GAMMA" | "BETA" | "ALPHA";

@@ -5,6 +5,21 @@ import { PublicKey } from "@solana/web3.js";
 export const escapeHtml = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
+/** The home menu — every screen ends here so nobody gets stuck. */
+export function mainMenuKeyboard() {
+  return new InlineKeyboard()
+    .text("💳 Deposit", "deposit")
+    .text("💰 Balance", "balance")
+    .row()
+    .text("📈 Copy a trader", "copytrade")
+    .text("🔍 Free coin pick", "bestcoin")
+    .row()
+    .text("📊 Trading Status", "trading")
+    .text("🐺 Plans", "plan:menu")
+    .row()
+    .text("❓ How it works", "help");
+}
+
 /**
  * Deposit copy buttons, shown on the welcome screen.
  * If the wallet already exists we use native copy_text buttons (one tap to copy);
@@ -13,15 +28,14 @@ export const escapeHtml = (s: string) =>
 export function depositKeyboard(w?: { address: string; evmAddress: string | null } | null) {
   const kb = new InlineKeyboard();
   if (w?.address && w.evmAddress) {
-    return kb
-      .copyText("🟡 Copy Solana Address", w.address)
+    kb.copyText("🟡 Copy Solana address", w.address)
       .row()
-      .copyText("🟢 Copy USDT Address", w.evmAddress);
+      .copyText("🟢 Copy USDT address", w.evmAddress)
+      .row();
+  } else {
+    kb.text("🟡 Show Solana address", "copy:sol").row().text("🟢 Show USDT address", "copy:evm").row();
   }
-  return kb
-    .text("🟡 Copy Solana Address", "copy:sol")
-    .row()
-    .text("🟢 Copy USDT Address", "copy:evm");
+  return kb.text("⬅️ Main menu", "menu");
 }
 
 export function isAddress(s: string) {
@@ -40,7 +54,9 @@ export function withdrawAssetKeyboard() {
     .row()
     .text("🟢 USDT (BEP-20)", "wd:asset:USDT")
     .row()
-    .text("◆ BNB (gas)", "wd:asset:BNB");
+    .text("◆ BNB (gas)", "wd:asset:BNB")
+    .row()
+    .text("❌ Cancel", "withdraw:cancel");
 }
 
 export function shortMint(mint: string) {
@@ -56,23 +72,31 @@ export function followKeyboard(f: {
   slippageBps: number;
 }) {
   return new InlineKeyboard()
-    .text(f.active ? "⏸ Pause" : "▶️ Start", `ct:toggle:${f.id}`)
+    .text(f.active ? "⏸ Pause copying" : "▶️ Start copying", `ct:toggle:${f.id}`)
     .row()
-    .text(f.paper ? "💵 Enable live trading" : "🛑 Disable live trading", `ct:mode:${f.id}`)
+    .text(f.paper ? "💵 Use real funds" : "🧪 Back to practice mode", `ct:mode:${f.id}`)
     .row()
-    .text("0.02", `ct:amt:${f.id}:20000000`)
-    .text("0.05", `ct:amt:${f.id}:50000000`)
-    .text("0.1", `ct:amt:${f.id}:100000000`)
+    .text("0.02 SOL", `ct:amt:${f.id}:20000000`)
+    .text("0.05 SOL", `ct:amt:${f.id}:50000000`)
+    .text("0.1 SOL", `ct:amt:${f.id}:100000000`)
     .row()
-    .text("🗑 Unfollow", `ct:del:${f.id}`);
+    .text("🗑 Stop copying", `ct:del:${f.id}`);
 }
 
 export function followText(f: { trader: { address: string } }) {
-  return `🚀 <b>Copytrading address <code>${f.trader.address}</code> in progress!</b>`;
+  return (
+    `🚀 <b>Copying this trader</b>\n\n` +
+    `<code>${f.trader.address}</code>\n\n` +
+    `When this trader buys or sells, I'll do the same in your account.\n\n` +
+    `⏳ Your copy is being set up. You'll get a message as soon as it goes live.`
+  );
 }
 
 /** Shown once the operator confirms a follow is live; edits the in-progress notice in place. */
 export const tradingText = (address: string) =>
-  `✅ <b>Copytrading address <code>${address}</code> is now live and copying trades!</b>`;
+  `✅ <b>Copying is live</b>\n\n` +
+  `Trader: <code>${address}</code>\n\n` +
+  `Every buy and sell they make is copied for you.\n` +
+  `Use the buttons below to pause, change your trade size, or stop anytime.`;
 
-export const processingText = "⏳ <b>Processing copytrading request...</b>";
+export const processingText = "⏳ <b>Setting up your copy...</b>";

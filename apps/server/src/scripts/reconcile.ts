@@ -9,7 +9,7 @@
  *   2 = fatal error (RPC/DB unavailable)
  */
 
-import { db, getConnection, getTokenBalanceRaw, getSolBalance, WSOL, getUsdtBalanceRaw, getEvmNativeBalance, env } from "@copytrade/core";
+import { db, getConnection, getTokenBalanceRaw, getSolBalance, WSOL, getUsdtBalanceRaw, getEvmNativeBalance, env, toBigInt } from "@copytrade/core";
 
 const conn = getConnection();
 
@@ -160,7 +160,7 @@ async function main() {
     const poolAddr = env.OPERATOR_SOL_ADDRESS;
     try {
       const poolBalance = await getSolBalance(poolAddr);
-      const totalLiability = users.reduce((sum, u) => sum + u.balanceSol, 0n);
+      const totalLiability = users.reduce((sum, u) => sum + toBigInt(u.balanceSol), 0n);
 
       if (poolBalance < totalLiability) {
         mismatches.push({

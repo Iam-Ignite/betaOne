@@ -2,7 +2,7 @@ import { z } from "zod";
 
 const schema = z.object({
   NODE_ENV: z.string().default("development"),
-  DATABASE_URL: z.string().min(1),
+  MONGODB_URI: z.string().min(1),
   TELEGRAM_BOT_TOKEN: z.string().min(1),
   TELEGRAM_WEBHOOK_SECRET: z.string().optional(),
   TELEGRAM_ADMIN_CHAT_ID: z.string().optional(),
@@ -22,6 +22,7 @@ const schema = z.object({
   WALLET_KEK_BASE64: z.string().optional(),
   ADMIN_USER: z.string().optional(),
   ADMIN_PASSWORD: z.string().optional(),
+  API_KEY: z.string().optional(),
   // Pooled custody: every deposit is swept from the user's pass-through address
   // into these operator-controlled wallets.
   OPERATOR_SOL_ADDRESS: z.string().optional(),

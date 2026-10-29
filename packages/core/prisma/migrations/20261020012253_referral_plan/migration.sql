@@ -8,7 +8,7 @@ CREATE TYPE "Side" AS ENUM ('BUY', 'SELL');
 CREATE TYPE "UserStatus" AS ENUM ('ACTIVE', 'FROZEN');
 
 -- CreateEnum
-CREATE TYPE "PlanType" AS ENUM ('FREE', 'BASIC', 'PRO', 'ENTERPRISE');
+CREATE TYPE "PlanType" AS ENUM ('OMEGA', 'GAMMA', 'BETA', 'ALPHA');
 
 -- CreateEnum
 CREATE TYPE "WithdrawAsset" AS ENUM ('SOL', 'USDT', 'BNB');
@@ -170,7 +170,7 @@ CREATE TABLE "User" (
     "balanceBnb" BIGINT NOT NULL DEFAULT 0,
     "balanceSol" BIGINT NOT NULL DEFAULT 0,
     "balanceUsdt" BIGINT NOT NULL DEFAULT 0,
-    "planType" "PlanType" NOT NULL DEFAULT 'FREE',
+    "planType" "PlanType" NOT NULL DEFAULT 'OMEGA',
     "planEndDate" TIMESTAMP(3),
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")

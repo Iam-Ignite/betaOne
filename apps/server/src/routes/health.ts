@@ -1,5 +1,5 @@
 import { Router, type Request, type Response } from "express";
-import { db, getPoolAddress, getPoolBalance, getConnection, env } from "@copytrade/core";
+import { db, getPoolAddress, getPoolBalance, getConnection, env, toBigInt } from "@copytrade/core";
 
 export const healthRouter = Router();
 
@@ -116,7 +116,7 @@ healthRouter.get("/metrics", async (_req: Request, res: Response) => {
     if (poolAddr) {
       const poolBal = await getPoolBalance();
       const totalLiability = (await db.user.findMany({ select: { balanceSol: true } })).reduce(
-        (sum, u) => sum + u.balanceSol,
+        (sum, u) => sum + toBigInt(u.balanceSol),
         0n,
       );
 

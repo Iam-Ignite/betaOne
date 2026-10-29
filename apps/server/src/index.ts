@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import { connectDB } from "@copytrade/core";
 import { startLoops } from "./worker/loops";
 import { initBot, ensureWebhook } from "./bot";
 import { telegramWebhook } from "./routes/telegram";
@@ -27,7 +28,16 @@ app.get("/health", (_req, res) => {
 app.use(healthRouter);
 
 // Telegram updates (grammY webhook; secret token verified by the adapter).
-app.post("/telegram", telegramWebhook);
+app.post("/telegram", async (req, res) => {
+  try {
+    await telegramWebhook(req, res);
+  } catch (err: any) {
+    console.error("[telegram] webhook error:", err);
+    if (!res.headersSent) {
+      res.status(200).send("OK");
+    }
+  }
+});
 
 // Helius enhanced webhook (trader activity → pending copy orders).
 app.use(heliusRouter);
@@ -40,6 +50,11 @@ app.use(adminRouter);
 
 const port = Number(process.env.PORT ?? 3001);
 app.listen(port, () => console.log(`server listening on :${port}`));
+
+// Connect to MongoDB eagerly on startup so the first request doesn't suffer connection latency
+connectDB()
+  .then(() => console.log("[db] connected to MongoDB"))
+  .catch((e) => console.error("[db] initial connection failed", e));
 
 // Register the Telegram webhook on boot (idempotent) so we don't depend on a
 // manual `set-webhook` run after each deploy. Failures are logged, not fatal.
